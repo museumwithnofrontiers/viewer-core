@@ -1,5 +1,26 @@
 # Changelog
 
+## 1.16.0
+
+Package side of epic museumwithnofrontiers/inventory-app#1730 ("Gallery/exhibition
+composables move to viewer-core"), 2026-09-19.
+
+### Added
+
+- `@museumwnf/viewer-core/dxa`: the gallery/exhibition-pair composables the
+  four live DXA sites each carried as byte-identical local copies —
+  `useGalleryData`/`useExhibitionData`, `useGalleryCollection`/
+  `useExhibitionCollection`, `useGalleryTimeline`/`useExhibitionTimeline`,
+  `useGalleryPartner`/`useExhibitionPartner`, `useGallerySheet`/
+  `useExhibitionSheet` — promoted per family (a gallery shape for carpets/
+  amulets, an exhibition shape for the-use-of-colours-in-art/water-in-islam),
+  never as one composable that papers over the two real behavioural
+  differences between them. `PAGE_SIZE`, `DATE_MODE`, `FACET_CATEGORIES`,
+  `FACET_LABEL_KEYS` and `useFacetLabels()` are shared verbatim by both
+  families. See the README's `@museumwnf/viewer-core/dxa` section for the
+  full export table and the `data` object each family's composables thread
+  through the rest.
+
 ## 1.15.1
 
 Part of metanull/inventory-app#1722.

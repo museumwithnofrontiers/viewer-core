@@ -11,8 +11,13 @@ describe('useDataPackage', () => {
   it('lists entities without the manifest or npm metadata', () => {
     const { entityNames } = useDataPackage()
     // The fixture directory contains package.json, like every installed
-    // npm package — it must not surface as an entity.
-    expect(entityNames).toEqual(['collections', 'countries', 'glossary', 'objects', 'partners', 'places', 'things', 'timeline_events', 'timelines'])
+    // npm package — it must not surface as an entity. `dynasties`,
+    // `exhibition`, `gallery`, `items` and `tags` were added for the DXA
+    // composables' own fixtures (tests/dxa/).
+    expect(entityNames).toEqual([
+      'collections', 'countries', 'dynasties', 'exhibition', 'gallery', 'glossary',
+      'items', 'objects', 'partners', 'places', 'tags', 'things', 'timeline_events', 'timelines',
+    ])
   })
 
   it('lazy-loads entity records', async () => {

@@ -1,0 +1,48 @@
+[
+  {
+    "id": "item-1",
+    "internal_name": "Bowl",
+    "country_id": "c-eg",
+    "partner_id": "partner-fr-owner",
+    "dynasty_ids": ["dyn-1"],
+    "tag_ids": ["tag-type-bowl", "tag-mat-ceramic"],
+    "start_date": 900,
+    "end_date": 950,
+    "project_id": "proj-a",
+    "owner_reference": "INV-1",
+    "artist_names": ["A. Potter"],
+    "images": [{ "url": "bowl.jpg", "display_order": 0 }],
+    "languages": ["en"],
+    "backward_compatibility": "mwnf3:objects:Obj1:eg"
+  },
+  {
+    "id": "item-2",
+    "internal_name": "Lamp",
+    "country_id": "c-sy",
+    "partner_id": "partner-de-plain",
+    "dynasty_ids": [],
+    "tag_ids": ["tag-type-lamp"],
+    "start_date": null,
+    "end_date": null,
+    "project_id": null,
+    "owner_reference": "INV-2",
+    "images": [],
+    "languages": [],
+    "backward_compatibility": "mwnf3_explore:objects:Obj2"
+  },
+  {
+    "id": "item-3",
+    "internal_name": "French-only piece",
+    "country_id": "c-tr",
+    "partner_id": "partner-fr-owner",
+    "dynasty_ids": [],
+    "tag_ids": [],
+    "start_date": 1100,
+    "end_date": 1150,
+    "project_id": "proj-a",
+    "owner_reference": "INV-3",
+    "images": [],
+    "languages": ["fr"],
+    "backward_compatibility": "mwnf3:objects:Obj3:tr"
+  }
+]

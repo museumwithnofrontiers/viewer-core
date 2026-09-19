@@ -1,0 +1,8 @@
+{
+  "id": "gallery-1",
+  "sibling_galleries": [
+    { "id": "sib-1", "legacy_host": "https://sibling.example.org", "hidden": false },
+    { "id": "sib-2", "legacy_host": null, "hidden": false },
+    { "id": "sib-3", "legacy_host": "https://hidden.example.org", "hidden": true }
+  ]
+}

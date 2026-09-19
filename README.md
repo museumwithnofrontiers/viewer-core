@@ -433,6 +433,52 @@ needs it; the standalone sites never import it.
 | `partnerFromKey(partners, countries, countryCode, legacyId)` | the partner a legacy `/partner/:country/:id` route names, or null — `partnerKey` in reverse |
 | `itemFromUidPath(items, path)` | the item a legacy dbUid *path* names, or null — `backward_compatibility` with `:` swapped for `/`, matched case-insensitively (Sharing History stores its keys lowercase) |
 
+### `@museumwnf/viewer-core/dxa`
+
+The gallery/exhibition-pair composables the four live DXA sites each wrote
+for themselves — `useCollection`/`useGalleryData`, the timeline, the
+partner specs and the item sheet — byte-identical within each pair
+(carpets/amulets — a gallery; the-use-of-colours-in-art/water-in-islam — an
+exhibition). Promoted here per family, never as one composable that papers
+over the two: the cross-family diff is real behaviour (the exhibition
+shape's per-language-build 404 gate, its own local-vs-country timeline
+switch, its manifest-driven citation line), confirmed file by file against
+both pairs' `origin/main` (epic metanull/inventory-app#1730). A separate
+entry point because only a gallery/exhibition site needs it.
+
+A site composes its own data/catalogue/timeline/partner/sheet module from
+these, threading the `data` object one family's
+`useGalleryData()`/`useExhibitionData()` call returns into the rest — the
+same explicit parameter every function below takes, rather than each
+re-reading a module-level singleton:
+
+```js
+import {
+  useGalleryData, useGalleryCollection, useGalleryTimeline, useGalleryPartner, useGallerySheet,
+} from '@museumwnf/viewer-core/dxa'
+
+const data = useGalleryData()
+const collection = useGalleryCollection(data)
+const timeline = useGalleryTimeline(data, collection)
+const partner = useGalleryPartner(data, collection)
+const sheet = useGallerySheet(data)
+```
+
+No export below reads a site name, a legacy project key, or a UUID: what a
+family's composables need beyond the data package itself is a `config`
+parameter (currently unused by either family — every DXA site so far
+shares the same entity list and catalogue shape; documented per function
+below for whichever future site needs its own).
+
+| Export (gallery / exhibition) | Reads | Returns |
+| --- | --- | --- |
+| `useGalleryData(config)` / `useExhibitionData(config)` | `config.eager` (entity names `loadEnglish` loads eagerly; default the family's own list, the exhibition's also carrying `themes`) | the family's whole data layer: `tr`/`md`/`mdInline`/`mdStrip`/`labelOf`/`loadEnglish`/`translations`, every entity and lookup map (`items`, `partners`, `countries`, `tags`, `dynasties`, `timelines`, `timelineEvents`, …), the routes (`itemRoute`, `partnerRoute`, `partnerObjectsRoute`), the legacy URL wrappers (`itemFromUidPath`, `partnerFromKey` — gallery only), `chromeImage`, `manifest`, `defaultLang`, plus family-specific fields (gallery: `siblingGalleries`/`pickSiblings`; exhibition: `isHiddenPartner`, `isInstitution`, `projectName`, `exhibitionTitle`/`exhibitionSubtitle`/`exhibitionHeadline`/`bannerCaption`, `siblingSites`) |
+| `useGalleryCollection(data, config)` / `useExhibitionCollection(data, config)` | the `data` object above; `config` unused today | `FACETS`, `tile(item, t)`, `collectionResults` (the `CatalogueResultsView` spec), plus the facet-value helpers (`countryIdForCode`, `tagLabelForLegacy`, gallery's own `tagIdForLegacy`, `hasEveryTag`) |
+| `useGalleryTimeline(data, collection, config)` / `useExhibitionTimeline(data, collection, config)` | `data`, the `collection` object above (for its `tile`); `config` unused today | the timeline specs (`timelineResults`/`timelineSpec`, `timelineGallery`/`timelineGallerySpec`) and their helpers (`countryLabel`/`countryIdForCode`, `timelineGalleryItems`; the exhibition shape adds `usesLocalTimeline`, `hasTimeline`, `timelineCountries`, `findEvents` for its own local-vs-country chronology switch) |
+| `useGalleryPartner(data, collection, config)` / `useExhibitionPartner(data, config)` | `data`, and (gallery only) `collection` for its `tile` | `partnerList`/`partnerListSpec`, `partnerSheet`/`partnerSheetSpec`, and (gallery only) `partnerObjects` — the exhibition shape's `partnerSpecs.js` never carried an objects-page spec |
+| `useGallerySheet(data, config)` / `useExhibitionSheet(data, config)` | `data`; `config` unused today | `{ itemSheet }`, the `RecordView` spec — the exhibition shape's `citation.project` reads `data.projectName`, absent from the gallery shape |
+| `PAGE_SIZE`, `DATE_MODE`, `FACET_CATEGORIES`, `FACET_LABEL_KEYS`, `useFacetLabels()` | — | the five THG catalogue facets, shared verbatim by both families (nine tiles a page, containment dates, `type`/`dynasty`/`subject`/`material`/`artist`) |
+
 ### The declaration outside a component
 
 | Export | Meaning |

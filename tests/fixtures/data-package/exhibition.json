@@ -1,0 +1,13 @@
+{
+  "id": "exh-1",
+  "hidden_partner_ids": ["partner-de-plain"],
+  "has_timeline": true,
+  "has_country_timeline": false,
+  "titles": { "en": "Fixture Exhibition" },
+  "subtitles": { "en": "A fixture" },
+  "headlines": { "en": "Welcome" },
+  "banner_captions": { "en": "Banner" },
+  "sibling_sites": [
+    { "id": "sib-1", "legacy_host": "https://sibling.example.org", "hidden": false }
+  ]
+}
