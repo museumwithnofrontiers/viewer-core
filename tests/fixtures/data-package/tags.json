@@ -1,0 +1,5 @@
+[
+  { "id": "tag-type-bowl", "category": "type", "legacy_tag_id": "42", "label": "Bowl" },
+  { "id": "tag-mat-ceramic", "category": "material", "legacy_tag_id": "7", "label": "Ceramic" },
+  { "id": "tag-type-lamp", "category": "type", "legacy_tag_id": "43", "label": "Lamp" }
+]
