@@ -11,9 +11,8 @@ on:
 # the full explanation.
 permissions:
   contents: read
-  packages: write
   id-token: write
 
 jobs:
   publish:
-    uses: museumwithnofrontiers/viewer-workflows/.github/workflows/package-release.yml@v1.7.0
+    uses: museumwithnofrontiers/viewer-workflows/.github/workflows/package-release.yml@v1.7.1
