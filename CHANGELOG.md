@@ -3,7 +3,9 @@
 ## 1.16.0
 
 Package side of epic museumwithnofrontiers/inventory-app#1730 ("Gallery/exhibition
-composables move to viewer-core"), 2026-09-19.
+composables move to viewer-core"), 2026-09-19. Also carries the package side
+of epic museumwithnofrontiers/inventory-app#1731 ("Identical thin views fold
+into the shared layer"), same day.
 
 ### Added
 
@@ -20,6 +22,19 @@ composables move to viewer-core"), 2026-09-19.
   families. See the README's `@museumwnf/viewer-core/dxa` section for the
   full export table and the `data` object each family's composables thread
   through the rest.
+- `createStandardViewer(config, siteClass, options)`: every website's
+  `main.js` did the same message-merge/createViewer/mount scaffold, byte-
+  identical across all seven sites but for one import specifier
+  (`@museumwnf/viewer-i18n/{standalone|gallery|exhibition}`). This helper
+  does the merge (`options.dictionary` + `options.ownMessages`, local wins),
+  wires `siteClass` in as `config.shell` when the config doesn't already set
+  one, and mounts the result. It does not import `@museumwnf/viewer-i18n`
+  itself — that would force every site to carry all three family
+  dictionaries, or replace a bundler-time choice with one that cannot be
+  tree-shaken — so the website still imports its own family's `catalogues`
+  and passes it in, along with its own CSS imports and locale glob, which
+  stay in `main.js` for the same static-specifier reason. See the README's
+  `createStandardViewer` section.
 
 ## 1.15.1
 

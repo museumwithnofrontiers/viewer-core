@@ -44,7 +44,25 @@ The `defineViewerConfig` helper returns a Vite config object with the shared set
 
 ## Usage
 
-`main.js` (this is the whole website entry point):
+`main.js`, once its own CSS imports and locale glob are done (see
+`createStandardViewer` below for exactly what a website still writes):
+
+```js
+import { createStandardViewer } from '@museumwnf/viewer-core'
+import { catalogues } from '@museumwnf/viewer-i18n/gallery'
+import config from './dataset.config.js'
+import SiteShell from './SiteShell.vue'
+
+const ownMessages = {}
+for (const [path, module] of Object.entries(import.meta.glob('../locales/*.json', { eager: true }))) {
+  ownMessages[path.split('/').pop().replace(/\.json$/, '')] = module.default
+}
+
+createStandardViewer(config, SiteShell, { dictionary: catalogues, ownMessages })
+```
+
+A website that wants the lower-level building block on its own — no shell
+wiring, no message merge, caller mounts it — calls `createViewer()` directly:
 
 ```js
 import { createViewer } from '@museumwnf/viewer-core'
@@ -53,6 +71,46 @@ createViewer(config).mount('#app')
 ```
 
 ## API
+
+### `createStandardViewer(config, siteClass, options)` → the mounted Vue app
+
+The one-call form of the `main.js` pattern above: merges `options.dictionary`
+(a `@museumwnf/viewer-i18n/{standalone|gallery|exhibition}` catalogue) with
+`options.ownMessages` (a website's own texts, local wins — same rule as
+[`mergeMessages`](#texts)), calls `createViewer()` with `siteClass` as the
+shell (only when `config.shell` isn't already set — an existing
+`dataset.config.js` that sets `shell` itself keeps working unchanged),
+mounts the result at `options.el` (`'#app'` by default) and returns the
+mounted app.
+
+| Argument | Type | Required | Meaning |
+| --- | --- | --- | --- |
+| `config` | object | yes | the website's `dataset.config.js` object, exactly as passed to `createViewer` |
+| `siteClass` | Vue component | no | the website's `SiteShell`; used as `config.shell` when `config.shell` is unset |
+| `options.dictionary` | object | no | the family catalogue from `@museumwnf/viewer-i18n` |
+| `options.ownMessages` | object | no | the website's own catalogue (e.g. from the `import.meta.glob` loop); overloads `dictionary`, local wins |
+| `options.el` | string \| Element | no | mount target, defaults to `'#app'` |
+
+Without `options.dictionary`, the merge step is skipped and `config.messages`
+(or `options.ownMessages` on its own) is used as-is — a website that has
+already merged its texts, or has none to merge, needs neither.
+
+`viewer-core` does not import `@museumwnf/viewer-i18n` itself: its three
+family dictionaries are separate subpath entry points precisely so a
+website's bundle carries only the one it uses, and choosing between them at
+runtime from a string would cost that tree-shaking (or force every consumer
+to depend on the whole package). The website still imports its own family's
+`catalogues` and passes it in.
+
+What a website's `main.js` still writes, and why it cannot move here:
+
+- its own CSS imports (`@museumwnf/viewer-layout/style.css`, theme and site
+  stylesheets) — each is a static, site-relative specifier only the site's
+  own module can write;
+- the `import.meta.glob('../locales/*.json', { eager: true })` loop — a
+  glob is resolved relative to the file that calls it, so from inside this
+  package it would look for `locales/` next to viewer-core, not next to the
+  website.
 
 ### `createViewer(config)` → Vue app (caller mounts it)
 
@@ -136,6 +194,11 @@ for (const [path, module] of Object.entries(import.meta.glob('../locales/*.json'
 
 createViewer({ ...config, messages: mergeMessages(catalogues, local) }).mount('#app')
 ```
+
+`createStandardViewer(config, siteClass, { dictionary, ownMessages })` (see
+[above](#createstandardviewerconfig-siteclass-options--the-mounted-vue-app))
+does exactly this merge, plus the shell wiring and the mount — a website
+normally reaches for that instead of calling `mergeMessages` itself.
 
 | Export | Use |
 | --- | --- |

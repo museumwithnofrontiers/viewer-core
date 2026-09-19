@@ -1,4 +1,5 @@
 export { createViewer } from './createViewer.js'
+export { createStandardViewer } from './createStandardViewer.js'
 export { useCatalogueData } from './composables/useCatalogueData.js'
 export { useDataPackage } from './composables/useDataPackage.js'
 export { byId, entityRef, loadEntities, useEntities } from './composables/useEntities.js'
