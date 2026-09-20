@@ -1,5 +1,19 @@
 # Changelog
 
+## 1.16.1 (2026-09-20)
+
+### Fixed
+
+- `dxa/exhibition/useExhibitionTimeline`: `usesLocalTimeline` and `hasTimeline`
+  read `exhibition.has_timeline`/`exhibition.has_country_timeline` straight off
+  the `exhibition` ref instead of `exhibition.value.*`, so both computeds were
+  always `false` — the Timeline nav entry and the item sheet's "timeline for
+  this item" popout never rendered on the-use-of-colours-in-art and
+  water-in-islam, whatever the package said
+  (museumwithnofrontiers/inventory-app#1826). Faithful promotion of a
+  pre-existing site defect from before #1730, not a regression of the
+  extraction.
+
 ## 1.16.0
 
 Package side of epic museumwithnofrontiers/inventory-app#1730 ("Gallery/exhibition

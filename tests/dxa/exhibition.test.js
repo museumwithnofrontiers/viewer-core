@@ -54,7 +54,9 @@ function makeData(exhibitionOverrides = {}) {
   return {
     manifest,
     defaultLang: 'en',
-    exhibition: { has_timeline: true, has_country_timeline: false, ...exhibitionOverrides },
+    // A shallowRef, matching useExhibitionData()'s entityRef('exhibition') —
+    // every read in useExhibitionTimeline must go through `.value`.
+    exhibition: ref({ has_timeline: true, has_country_timeline: false, ...exhibitionOverrides }),
     tr: (entity, id, lang = 'en') => translationsByLang[lang]?.[id] ?? {},
     translations: () => ({}),
     mdInline: (s) => String(s).replace(/\*/g, ''),
@@ -113,6 +115,7 @@ describe('useExhibitionTimeline', () => {
     const collection = useExhibitionCollection(data)
     const timeline = useExhibitionTimeline(data, collection)
     expect(timeline.usesLocalTimeline.value).toBe(true)
+    expect(timeline.hasTimeline.value).toBe(true)
     expect(timeline.timelineSpec.value.scope).toBe('local')
     // No country picker on the local-chronology shape.
     expect(timeline.timelineCountries.value).toEqual([])
@@ -123,8 +126,19 @@ describe('useExhibitionTimeline', () => {
     const collection = useExhibitionCollection(data)
     const timeline = useExhibitionTimeline(data, collection)
     expect(timeline.usesLocalTimeline.value).toBe(false)
+    expect(timeline.hasTimeline.value).toBe(true)
     expect(timeline.timelineSpec.value.scope).toBe('country')
     expect(timeline.timelineCountries.value.map((row) => row[0])).toEqual(['all', 'eg'])
+  })
+
+  it('has no Timeline section at all when both chronology flags are false', () => {
+    const data = makeData({ has_timeline: false, has_country_timeline: false })
+    const collection = useExhibitionCollection(data)
+    const timeline = useExhibitionTimeline(data, collection)
+    expect(timeline.hasTimeline.value).toBe(false)
+    // Still the exhibition's own chronology by scope, even though nothing
+    // surfaces a link to it — the flags gate navigation, not data.
+    expect(timeline.usesLocalTimeline.value).toBe(true)
   })
 
   it('finds the events for a country and year range, text and country name attached', () => {

@@ -44,7 +44,7 @@ export function useExhibitionTimeline(data, collection, config = {}) {
 
   /** True when the Timeline section is the exhibition's own chronology. */
   const usesLocalTimeline = computed(
-    () => !exhibition.has_country_timeline && Boolean(localTimeline.value),
+    () => !exhibition.value?.has_country_timeline && Boolean(localTimeline.value),
   )
 
   /**
@@ -58,7 +58,7 @@ export function useExhibitionTimeline(data, collection, config = {}) {
    * introduction. Only the links into it are withheld.
    */
   const hasTimeline = computed(
-    () => Boolean(exhibition.has_timeline || exhibition.has_country_timeline),
+    () => Boolean(exhibition.value?.has_timeline || exhibition.value?.has_country_timeline),
   )
 
   /** The events this site's manual Timeline reads (ItemSheet's own popout). */
