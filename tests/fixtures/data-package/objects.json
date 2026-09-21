@@ -12,7 +12,7 @@
     "glossary_ids": ["g1"],
     "related_items": [
       { "id": "o2", "in_package": true, "justifications": { "en": "Same workshop", "fr": "Même atelier" } },
-      { "id": "x9", "in_package": false, "backward_compatibility": "mwnf3:objects:x9", "project_key": "ISL" }
+      { "id": "x9", "in_package": false, "backward_compatibility": "mwnf3:objects:x9", "project_id": "proj-a" }
     ]
   },
   {
