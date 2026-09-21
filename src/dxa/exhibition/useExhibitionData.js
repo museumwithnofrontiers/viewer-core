@@ -168,9 +168,8 @@ export function useExhibitionData(config = {}) {
   // A member is borrowed from the MWNF project that originally published
   // it. The name is the data package's own `manifest.projects` entry
   // (populated by the importer/exporter), keyed by this record's
-  // `project_id` (a UUID) — not viewer-core's deprecated, legacy-key-keyed
-  // `projectName()`/`projectFamily()`, and not an exhibition's own
-  // project-key comparisons either. The manifest already names an
+  // `project_id` (a UUID) — not a legacy-key lookup, and not an exhibition's
+  // own project-key comparisons either. The manifest already names an
   // exhibition's own native project under its own uuid (the sibling
   // `Collection` the importer creates alongside every `Project` carries the
   // same title), so there is no special case here for a native member any

@@ -7,88 +7,11 @@ import { resolveRecordLanguage } from './composables/useRecordLanguage.js'
 
 // Three small conventions each website had written for itself.
 
-// ── Project names ──────────────────────────────────────────────────────────
-//
-// `mwnf3.projectnames`, the whole table rather than the projects a website
-// happens to borrow from, since that set moves with every reimport. The key
-// on the left is data; the entry on the right is a shared text
-// (`core.project.*` in viewer-i18n), written out so a reader can see the
-// eight this asks for. A key that is not here reads as itself.
-//
-// @deprecated Project data belongs in the data package, not in viewer-core.
-// Read a project's name from `manifest.projects` via `projectLabel()` /
-// `useProjects()` instead (epic metanull/inventory-app#1727, phase 3) — see
-// the migration table below. Kept only for sites that have not migrated yet
-// (phase 4); removed in the cleanup wave.
-export const PROJECT_ENTRIES = Object.freeze({
-  ISL: 'core.project.islamicArt',
-  EPM: 'core.project.explorePartners',
-  DBA: 'core.project.baroqueArt',
-  BAR: 'core.project.baroqueArt',
-  AWE: 'core.project.sharingHistory',
-  awe: 'core.project.sharingHistory',
-  DCA: 'core.project.carpetArt',
-  DGA: 'core.project.glassArt',
-  EXTHE: 'core.project.tableIsSet',
-  GALLERIES: 'core.project.galleries',
-})
-
-/** The name of a project by its legacy key, through `t`; the key itself when unknown. */
-export function projectName(key, t) {
-  const entry = PROJECT_ENTRIES[key]
-  return entry ? t(entry) : (key ?? '')
-}
-
-/** `projectName` bound to the installed texts, for a component. */
-export function useProjectName() {
-  const { t } = useI18n()
-  return (key) => projectName(key, t)
-}
-
-// A member is borrowed from the MWNF project that originally published it,
-// and legacy names and colours that project on the item sheet and in the
-// results grid — two separate mappings, because legacy keeps them separate:
-// the name is per project key (`PROJECT_ENTRIES` above), the colour is per
-// project *family*, so ISL and EPM share a swatch and every exhibition
-// shares another. The two exhibition sites re-hard-coded this table as
-// English literals next to their own copy of the name table, which is why a
-// project name translates on the galleries and not on the exhibitions.
-//
-// @deprecated Chip colour is a per-project site-config map keyed by the
-// project UUID (epic #1727 decision 1: no family/parent relation is modeled
-// anywhere, this table was always a frontend invention). Removed in the
-// cleanup wave alongside `PROJECT_ENTRIES`.
-export const PROJECT_FAMILIES = Object.freeze({
-  ISL: 'ISLandEPM',
-  EPM: 'ISLandEPM',
-  DBA: 'DBA',
-  BAR: 'DBA',
-  AWE: 'AWE',
-  awe: 'AWE',
-  DCA: 'DCA',
-  DGA: 'DGA',
-  EXTHE: 'EXH',
-  GALLERIES: 'Galleries',
-})
-
-/**
- * A project's family by its legacy key — legacy's own class names, so a
- * site's CSS reads as the stylesheet it was copied from. A key with no
- * entry falls back to itself, the same rule `projectName` applies.
- *
- * @deprecated See `PROJECT_FAMILIES`.
- */
-export function projectFamily(key) {
-  return PROJECT_FAMILIES[key] ?? (key ?? '')
-}
-
 // ── Projects, from the data package ─────────────────────────────────────────
 //
-// `manifest.projects` (epic metanull/inventory-app#1727, phase 2 —
-// `scripts/exporters`) is what `PROJECT_ENTRIES`/`PROJECT_FAMILIES` above
-// should have been: project data belongs in the data package a project's own
-// exporter writes, not in a table viewer-core carries for every website. Its
-// shape, one entry per project UUID:
+// `manifest.projects` (epic metanull/inventory-app#1727 — `scripts/exporters`)
+// is project data from the data package a project's own exporter writes.
+// Its shape, one entry per project UUID:
 //
 //   manifest.projects[projectId] = {
 //     name: { <lang>: '…' },                    // per-language title
@@ -99,21 +22,8 @@ export function projectFamily(key) {
 //
 // A data package built before this phase simply has no `projects` key at
 // all; `projectLabel`/`projectLinks` answer `null` for that case exactly as
-// they do for an unknown `projectId` — a site notices nothing until it
-// migrates. Migration mapping, from the epic's design comment (§B):
-//
-//   RecordView citation line           → projectLabel(manifest, record.project_id, lang) (viewer-layout#81)
-//   ItemSheet "Source database" line   → same, plus a site-config colour map keyed by project UUID (no more `projectFamily`)
-//   "Search related database" block    → projectLinks(manifest, id).relatedDatabaseUrl, rendered iff non-null
-//   Artistic Introduction link         → projectLinks(manifest, id).artisticIntroductionUrl, iff non-null
-//   search-scope include-EPM checkbox  → stays the site's own dataset.config.js scope list (not modeled here — decision 5)
-//   partner Museums/Institutions split → partner.project_uuids matched against a site-config list (decision 5)
-//
-// `PROJECT_ENTRIES`, `PROJECT_FAMILIES` and `projectFamily` are deprecated by
-// this section and removed in the cleanup wave once every site has moved
-// (phase 4). `projectName()`/`useProjectName()` are unaffected — they still
-// resolve a *legacy key* through the installed texts, for whatever has not
-// migrated yet.
+// they do for an unknown `projectId`. See CHANGELOG.md 2.0.0 for the
+// migration notes from this package's former legacy-key conventions.
 
 /** One entry of `manifest.projects`, or `null` when the package predates
  * the section or does not carry `projectId`. */
@@ -156,9 +66,8 @@ export function projectLinks(manifest, projectId) {
 
 /**
  * `projectLabel`/`projectLinks` bound to the installed data package and
- * texts, for a component — the manifest-driven analogue of
- * `useProjectName()`. `label(projectId)` reads the site's active language;
- * pass a language explicitly to read another.
+ * texts, for a component. `label(projectId)` reads the site's active
+ * language; pass a language explicitly to read another.
  */
 export function useProjects() {
   const { manifest } = useDataPackage()

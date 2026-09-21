@@ -1,51 +1,23 @@
 import { beforeAll, describe, expect, it } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { createMemoryHistory, createRouter } from 'vue-router'
+import * as core from '../src/index.js'
 import {
-  PROJECT_ENTRIES, PROJECT_FAMILIES, createI18n, loadEntities, mwnfLinks, projectFamily, projectLabel,
-  projectLinks, projectName, sectionMeta, useFeaturedRecord, useProjectName, useProjects, useSection,
+  createI18n, loadEntities, mwnfLinks, projectLabel,
+  projectLinks, sectionMeta, useFeaturedRecord, useProjects, useSection,
 } from '../src/index.js'
 
-describe('projectName', () => {
-  const t = (key) => (key === 'core.project.islamicArt' ? 'Discover Islamic Art' : key)
-
-  it('names a project by its legacy key through the texts, and reads an unknown key as itself', () => {
-    expect(projectName('ISL', t)).toBe('Discover Islamic Art')
-    expect(projectName('ZZZ', t)).toBe('ZZZ')
-    expect(projectName(undefined, t)).toBe('')
-  })
-
-  it('asks for one entry per project of the legacy table, both spellings of Sharing History included', () => {
-    expect(PROJECT_ENTRIES.AWE).toBe(PROJECT_ENTRIES.awe)
-    expect(new Set(Object.values(PROJECT_ENTRIES)).size).toBe(8)
-  })
-
-  it('binds to the installed texts inside a component', () => {
-    const i18n = createI18n({ messages: { en: { 'core.project.carpetArt': 'Discover Carpet Art' } } })
-    let name
-    mount({ setup() { name = useProjectName(); return () => null } }, { global: { plugins: [i18n] } })
-    expect(name('DCA')).toBe('Discover Carpet Art')
+describe('the legacy project API (removed in 2.0.0)', () => {
+  it('is not exported from the package entry, so a re-export by mistake fails loudly', () => {
+    expect(core).not.toHaveProperty('PROJECT_ENTRIES')
+    expect(core).not.toHaveProperty('PROJECT_FAMILIES')
+    expect(core).not.toHaveProperty('projectName')
+    expect(core).not.toHaveProperty('useProjectName')
+    expect(core).not.toHaveProperty('projectFamily')
   })
 })
 
-describe('projectFamily', () => {
-  it('answers a project\'s colour family by its legacy key, and the key itself when unknown', () => {
-    expect(projectFamily('ISL')).toBe('ISLandEPM')
-    expect(projectFamily('EPM')).toBe('ISLandEPM')
-    expect(projectFamily('DBA')).toBe('DBA')
-    expect(projectFamily('ZZZ')).toBe('ZZZ')
-    expect(projectFamily(undefined)).toBe('')
-  })
-
-  it('has one entry per key of PROJECT_ENTRIES, both spellings of Sharing History included', () => {
-    expect(Object.keys(PROJECT_FAMILIES).sort()).toEqual(Object.keys(PROJECT_ENTRIES).sort())
-    expect(PROJECT_FAMILIES.AWE).toBe(PROJECT_FAMILIES.awe)
-  })
-})
-
-// Epic metanull/inventory-app#1727 phase 3: `manifest.projects`, with
-// fallback to the PROJECT_ENTRIES/PROJECT_FAMILIES convention above for a
-// package that predates the section.
+// Epic metanull/inventory-app#1727: `manifest.projects`.
 describe('projectLabel', () => {
   const manifest = {
     projects: {

@@ -39,8 +39,7 @@ export { groupByCountry, partnerHierarchy } from './record/partners.js'
 
 // Conventions every website had written for itself.
 export {
-  PROJECT_ENTRIES, PROJECT_FAMILIES, mwnfLinks, projectFamily, projectLabel,
-  projectLinks, projectName, sectionMeta, useFeaturedRecord, useProjectName,
+  mwnfLinks, projectLabel, projectLinks, sectionMeta, useFeaturedRecord,
   useProjects, useSection,
 } from './conventions.js'
 
