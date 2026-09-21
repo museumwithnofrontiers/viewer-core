@@ -1,5 +1,31 @@
 # Changelog
 
+## 2.0.0 (2026-09-21)
+
+Cleanup wave of epic museumwithnofrontiers/inventory-app#1727 ("Project
+references move off legacy keys onto the data package's UUIDs"). Every
+site had already moved to `manifest.projects` in phase 4 (1.16.0/2.14.0,
+2026-09-20); this removes the legacy-key convention itself.
+
+### Removed
+
+- `PROJECT_ENTRIES`, `PROJECT_FAMILIES`, `projectName`, `useProjectName`,
+  `projectFamily` — the legacy-key-keyed project name/colour-family
+  conventions `conventions.js` carried for every site. No longer exported
+  from `src/index.js`.
+
+### Migration
+
+- A project's name by legacy key (`projectName(key, t)` /
+  `useProjectName()` / `PROJECT_ENTRIES`) → `useProjects().label(projectId)`
+  or `projectLabel(manifest, projectId, lang)`, keyed by the project's UUID
+  (`record.project_id`) instead of its legacy key.
+- A project's colour family by legacy key (`projectFamily(key)` /
+  `PROJECT_FAMILIES`) → a site's own `dataset.config.js` colour map keyed
+  by project UUID (epic decision 1: no family/parent relation is modeled
+  anywhere — this was always a frontend invention layered over independent
+  DB rows, not a real hierarchy).
+
 ## 1.16.1 (2026-09-20)
 
 ### Fixed

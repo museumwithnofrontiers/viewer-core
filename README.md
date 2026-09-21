@@ -452,8 +452,6 @@ under the main partner it belongs to.
 
 | Export | Meaning |
 | --- | --- |
-| `projectName(key, t)` / `useProjectName()` / `PROJECT_ENTRIES` ⚠️ deprecated | a project's name by its legacy key (`ISL`, `EPM`, `DBA`, `BAR`, `AWE`, `DCA`, `DGA`, `EXTHE`, `GALLERIES`), through `core.project.*`; an unknown key reads as itself |
-| `projectFamily(key)` / `PROJECT_FAMILIES` ⚠️ deprecated | a project's colour family by the same legacy key (ISL and EPM share `ISLandEPM`, every exhibition shares `EXH`, …) — legacy's own class names, so a site's CSS reads as the stylesheet it was copied from; an unknown key reads as itself |
 | `useSection()` | the `meta.section` of the current route — see Routing |
 | `useFeaturedRecord(entity, { withImage = true, seed })` | one record at random for a landing page's spotlight, among those with an image; null until the entity is loaded; `seed` pins the pick |
 | `sectionMeta(chrome = [])` | returns `meta(section, ...entities) => ({ section, entities: [...chrome, ...entities] })` — a route's `meta` in one call, `chrome` being the entities every page of the site loads regardless of which one it is |
@@ -461,26 +459,24 @@ under the main partner it belongs to.
 
 #### Projects, from the data package (epic metanull/inventory-app#1727)
 
-`manifest.projects` — a project UUID → `{ name: { <lang>: '…' }, site_url, related_database_url, artistic_introduction_url }` map, emitted by every exporter since #1727 phase 2 — is project data moved out of viewer-core and into the data package a project's own exporter writes. It is additive: a package built before phase 2 simply has no `projects` key, and every function below reads that exactly like an unknown project id — `null`, never a throw.
+`manifest.projects` — a project UUID → `{ name: { <lang>: '…' }, site_url, related_database_url, artistic_introduction_url }` map, emitted by every exporter since #1727 phase 2 — is project data read from the data package a project's own exporter writes, not carried in viewer-core. It is additive: a package built before phase 2 simply has no `projects` key, and every function below reads that exactly like an unknown project id — `null`, never a throw.
 
 | Export | Meaning |
 | --- | --- |
 | `projectLabel(manifest, projectId, lang)` | `manifest.projects[projectId].name[…]`, with the same language fallback every translated field in this package follows (`resolveRecordLanguage`): `lang`, then this package's base language (`en`), then the entry's first carried language. `null` when the package has no `projects` section, `projectId` isn't a key of it, or the entry names nothing. |
 | `projectLinks(manifest, projectId)` | `{ siteUrl, relatedDatabaseUrl, artisticIntroductionUrl }` from the same entry (camelCased, individually nullable — a project may simply have no value for one). `null` for the whole result when the package predates the section or doesn't carry `projectId`. |
-| `useProjects()` | `{ label(projectId, lang?), links(projectId) }` bound to the installed data package and active language — the manifest-driven analogue of `useProjectName()`. |
+| `useProjects()` | `{ label(projectId, lang?), links(projectId) }` bound to the installed data package and active language. |
 
-Migration mapping, from the epic's design comment (§B) — what each of the five usages moves to:
+What each of the sites' former legacy-key usages reads now, from `manifest.projects` (see CHANGELOG.md 2.0.0 for the full removal/migration notes):
 
-| Today (deprecated) | Reads from `manifest.projects` instead |
+| Formerly | Now reads |
 | --- | --- |
-| RecordView citation line (`projectName(record.project_key, t)`) | `projectLabel(manifest, record.project_id, lang)` / `useProjects().label(record.project_id)` — tracked on viewer-layout#81 |
-| ItemSheet "Source database" line + `mwnf-chip--<family>` colour | same `projectLabel`, plus a site-config map from project UUID to a CSS token (no more `projectFamily`) |
+| RecordView citation line (`projectName(record.project_key, t)`) | `projectLabel(manifest, record.project_id, lang)` / `useProjects().label(record.project_id)` |
+| ItemSheet "Source database" line + `mwnf-chip--<family>` colour | `projectLabel`, plus a site-config map from project UUID to a CSS token |
 | "Search related database" block | `projectLinks(manifest, projectId).relatedDatabaseUrl`, rendered iff non-null |
 | Artistic Introduction link | `projectLinks(manifest, projectId).artisticIntroductionUrl`, iff non-null |
-| Search-scope include-EPM checkbox | unchanged by this phase — stays the site's own `dataset.config.js` scope list (epic decision 5) |
-| Partner Museums/Institutions split | unchanged by this phase — `partner.project_uuids` matched against a site-config list (epic decision 5) |
-
-`PROJECT_ENTRIES`, `PROJECT_FAMILIES` and `projectFamily` are deprecated as of this phase and will be removed in the cleanup wave once every site has migrated (phase 4); `projectName()`/`useProjectName()` are unaffected for now — they still resolve a *legacy key* through the installed texts for whatever hasn't migrated yet.
+| Search-scope include-EPM checkbox | the site's own `dataset.config.js` scope list (epic decision 5) |
+| Partner Museums/Institutions split | `partner.project_uuids` matched against a site-config list (epic decision 5) |
 
 ### `@museumwnf/viewer-core/legacy`
 
