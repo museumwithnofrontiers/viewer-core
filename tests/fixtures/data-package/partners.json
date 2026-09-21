@@ -4,7 +4,7 @@
     "country_id": "country-fr",
     "level": "partner",
     "parent_id": null,
-    "project_ids": ["ISL"],
+    "project_uuids": ["proj-a"],
     "item_count": 12,
     "featured": true
   },
@@ -13,7 +13,7 @@
     "country_id": "country-fr",
     "level": "associated_partner",
     "parent_id": "partner-fr-owner",
-    "project_ids": ["ISL"],
+    "project_uuids": ["proj-a"],
     "item_count": 3,
     "featured": false
   },
@@ -22,7 +22,7 @@
     "country_id": "country-fr",
     "level": "associated_partner",
     "parent_id": "partner-fr-owner",
-    "project_ids": ["ISL"],
+    "project_uuids": ["proj-a"],
     "item_count": 0,
     "featured": false
   },
@@ -30,7 +30,7 @@
     "id": "partner-de-plain",
     "country_id": "country-de",
     "parent_id": null,
-    "project_ids": ["EPM"],
+    "project_uuids": ["proj-b"],
     "item_count": 5,
     "featured": false
   }
