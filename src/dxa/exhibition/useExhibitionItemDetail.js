@@ -25,14 +25,15 @@ import { useExhibitionSheet } from './useExhibitionSheet.js'
  * Reads `data.defaultLang`, `data.dynastyById`, `data.isExploreRecord`,
  * `data.isHiddenPartner`, `data.labelOf`, `data.partnerById`,
  * `data.partnerRoute`, `data.translations`, what `useExhibitionSheet` reads,
- * and `timeline.countryIdForCode`, `timeline.findEvents`,
- * `timeline.hasTimeline`, `timeline.timelineCountries`, `timeline.timelineSpec`.
+ * and `timeline.countryIdForCode`, `timeline.hasTimeline`,
+ * `timeline.timelineEvents` (`countries`, `findEvents`), `timeline.timelineSpec`.
  */
 export function useExhibitionItemDetail(data, timeline) {
   const {
     defaultLang, dynastyById, isExploreRecord, isHiddenPartner, labelOf, partnerById, partnerRoute, translations,
   } = data
-  const { countryIdForCode, findEvents, hasTimeline, timelineCountries, timelineSpec } = timeline
+  const { countryIdForCode, hasTimeline, timelineEvents, timelineSpec } = timeline
+  const { countries: timelineCountries, findEvents } = timelineEvents
   const { itemSheet: platformSheet } = useExhibitionSheet(data)
 
   function chipClass(record) {
@@ -50,11 +51,11 @@ export function useExhibitionItemDetail(data, timeline) {
       .filter((d) => d && dynastyTr(d, language).history)
   }
 
-  // The country the "Timeline for this item" popout opens on: the legacy
-  // two-letter code whose id is the record's own country.
-  function countryCodeOf(countryId) {
-    for (const [code] of timelineCountries.value) {
-      if (countryIdForCode(code) === countryId) return code
+  // The country the "Timeline for this item" popout opens on: the picker's
+  // entry for the record's own country.
+  function countryOf(countryId) {
+    for (const { value } of timelineCountries.value) {
+      if (countryIdForCode(value) === countryId) return value
     }
     return null
   }
@@ -63,9 +64,9 @@ export function useExhibitionItemDetail(data, timeline) {
   // the country and the period, under the keys the results page's controls
   // read — never a key it has no control for (a local timeline has no
   // country), which it would ignore (inventory-app#2022).
-  function periodSearch(countryCode, range) {
+  function periodSearch(country, range) {
     const keys = new Set((timelineSpec.value?.controls ?? []).map((control) => control.key))
-    const query = { country: countryCode, begin: range[0], end: range[1] }
+    const query = { country, begin: range[0], end: range[1] }
     return { name: 'timeline-results', query: Object.fromEntries(Object.entries(query).filter(([key]) => keys.has(key))) }
   }
 
@@ -115,9 +116,9 @@ export function useExhibitionItemDetail(data, timeline) {
         if (range[0] == null) return null
         return {
           heading: 'exhibition.section.timeline',
-          countries: timelineCountries.value.map(([value, label]) => ({ value, label })),
-          defaultCountry: () => countryCodeOf(record.country_id) ?? 'all',
-          events: (countryCode) => findEvents({ countryCode, start: range[0], end: range[1] }),
+          countries: timelineCountries.value.map((c) => ({ value: c.value, label: c.label ?? ctx.t('timeline.form.allCountries') })),
+          defaultCountry: () => countryOf(record.country_id) ?? 'all',
+          events: (country) => findEvents({ country, begin: range[0], end: range[1] }),
           range,
           era: (year) => eraLabel(year, ctx.t),
           searchTo: periodSearch,

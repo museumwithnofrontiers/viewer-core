@@ -23,23 +23,20 @@ export { DATE_MODE, FACET_CATEGORIES, FACET_LABEL_KEYS, PAGE_SIZE, useFacetLabel
  * The gallery's collection spec, over its own data layer's `data` (the
  * return value of {@link import('./useGalleryData.js').useGalleryData}).
  *
- * Reads `data.countries`, `data.tags`, `data.countryById`, `data.tagById`,
- * `data.labelOf`, `data.itemRoute`, `data.tr`, `data.defaultLang`,
- * `data.mdInline` and `data.manifest`. `config` carries nothing today.
+ * Reads `data.tags`, `data.countryById`, `data.tagById`, `data.labelOf`,
+ * `data.itemRoute`, `data.tr`, `data.defaultLang`, `data.mdInline`,
+ * `data.manifest` and `data.countryIdForCode`. `config` carries nothing
+ * today.
  */
 export function useGalleryCollection(data, config = {}) {
   void config
-  const { countries, tags, countryById, tagById, labelOf, itemRoute, tr, defaultLang, mdInline, manifest } = data
+  const { tags, countryById, tagById, labelOf, itemRoute, tr, defaultLang, mdInline, manifest, countryIdForCode } = data
 
   // ── What the URL carries ─────────────────────────────────────────────
   //
-  // The legacy 2-letter country code for `country`, the legacy tag id for a
-  // facet: the values legacy's URLs carried, so a link shared then still
-  // resolves now.
-
-  function countryIdForCode(code) {
-    return code ? (countries.value ?? []).find((c) => c.code === code)?.id ?? null : null
-  }
+  // The legacy 2-letter country code for `country` (the data layer's
+  // `countryIdForCode`), the legacy tag id for a facet: the values legacy's
+  // URLs carried, so a link shared then still resolves now.
 
   function tagIdForLegacy(legacyId) {
     return legacyId ? (tags.value ?? []).find((t) => t.legacy_tag_id === legacyId)?.id ?? null : null

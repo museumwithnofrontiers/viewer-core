@@ -6,6 +6,7 @@ import { useGalleryPartner } from '../../src/dxa/gallery/useGalleryPartner.js'
 import { useGallerySheet } from '../../src/dxa/gallery/useGallerySheet.js'
 import { useGalleryItemDetail } from '../../src/dxa/gallery/useGalleryItemDetail.js'
 import { setSiteConfig } from '../../src/siteConfig.js'
+import { useLegacyCountryCodes } from '../../src/dxa/countryCodes.js'
 
 // The gallery family's spec composables, over a small hand-built `data`
 // object shaped like the return value of `useGalleryData()` — no data
@@ -52,6 +53,13 @@ const timelines = ref([{ id: 'tl-eg', country_id: 'c-eg', backward_compatibility
 const manifest = { projects: { 'proj-a': { name: { en: 'Discover Carpet Art' } } } }
 
 function makeData() {
+  const labelOf = (entity, id) => {
+    if (!id) return ''
+    if (entity === 'countries') return countryById.value.get(id)?.internal_name ?? id
+    if (entity === 'partners') return partnerById.value.get(id)?.internal_name ?? id
+    if (entity === 'items') return translationsByLang.en[id]?.name?.replace(/\*/g, '') ?? id
+    return id
+  }
   return {
     manifest,
     defaultLang: 'en',
@@ -59,13 +67,7 @@ function makeData() {
     translations: (entity, lang) => (entity === 'dynasties' ? (dynastyTranslations[lang] ?? {}) : {}),
     mdInline: (s) => String(s).replace(/\*/g, ''),
     mdStrip: (s) => String(s).replace(/\*/g, ''),
-    labelOf: (entity, id) => {
-      if (!id) return ''
-      if (entity === 'countries') return countryById.value.get(id)?.internal_name ?? id
-      if (entity === 'partners') return partnerById.value.get(id)?.internal_name ?? id
-      if (entity === 'items') return translationsByLang.en[id]?.name?.replace(/\*/g, '') ?? id
-      return id
-    },
+    labelOf,
     itemRoute: (item) => ({ name: 'item', params: { id: item.id } }),
     countries,
     tags,
@@ -75,6 +77,8 @@ function makeData() {
     timelines,
     items,
     loadTranslations: () => {},
+    // What useGalleryData() adds over the lists above.
+    ...useLegacyCountryCodes({ countries, countryById, timelines, labelOf }),
   }
 }
 

@@ -22,26 +22,22 @@ export { DATE_MODE, FACET_CATEGORIES, FACET_LABEL_KEYS, PAGE_SIZE, useFacetLabel
  * The exhibition's collection spec, over its own data layer's `data` (the
  * return value of {@link import('./useExhibitionData.js').useExhibitionData}).
  *
- * Reads `data.countries`, `data.tags`, `data.countryById`, `data.tagById`,
- * `data.itemById`, `data.labelOf`, `data.itemRoute`, `data.tr`,
- * `data.defaultLang`, `data.mdInline`, `data.projectName`. `config` carries
- * nothing today.
+ * Reads `data.tags`, `data.countryById`, `data.tagById`, `data.itemById`,
+ * `data.labelOf`, `data.itemRoute`, `data.tr`, `data.defaultLang`,
+ * `data.mdInline`, `data.projectName`, `data.countryIdForCode`. `config`
+ * carries nothing today.
  */
 export function useExhibitionCollection(data, config = {}) {
   void config
   const {
-    countries, tags, countryById, tagById, itemById, labelOf, itemRoute, tr, defaultLang, mdInline, projectName,
+    tags, countryById, tagById, itemById, labelOf, itemRoute, tr, defaultLang, mdInline, projectName, countryIdForCode,
   } = data
 
   // ── What the URL carries ─────────────────────────────────────────────
   //
-  // The legacy 2-letter country code for `country`, the legacy tag id for a
-  // facet: the values legacy's URLs carried, so a link shared then still
-  // resolves now.
-
-  function countryIdForCode(code) {
-    return code ? (countries.value ?? []).find((c) => c.code === code)?.id ?? null : null
-  }
+  // The legacy 2-letter country code for `country` (the data layer's
+  // `countryIdForCode`), the legacy tag id for a facet: the values legacy's
+  // URLs carried, so a link shared then still resolves now.
 
   function tagLabelForLegacy(legacyId) {
     return (tags.value ?? []).find((t) => t.legacy_tag_id === legacyId)?.label ?? legacyId

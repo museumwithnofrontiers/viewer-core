@@ -3,6 +3,7 @@ import { mediaUrl } from '../../siteConfig.js'
 import { useCatalogueData } from '../../composables/useCatalogueData.js'
 import { useDataPackage } from '../../composables/useDataPackage.js'
 import { itemFromUidPath as legacyItemFromUidPath, partnerFromKey as legacyPartnerFromKey } from '../../legacy/index.js'
+import { useLegacyCountryCodes } from '../countryCodes.js'
 
 // The data layer every DXA gallery site (carpets, amulets, …) wrote for
 // itself: the entities a gallery reads, the lookup maps over them, its
@@ -61,6 +62,10 @@ export function useGalleryData(config = {}) {
   const dynastyById = catalogue.index('dynasties')
   const timelineById = catalogue.index('timelines')
   const languageByCode = catalogue.index('languages', 'code')
+
+  // The legacy country code both ways, the one table the collection and the
+  // timeline read.
+  const { countryIdForCode, countryLabel } = useLegacyCountryCodes({ countries, countryById, timelines, labelOf })
 
   // ── Routes ─────────────────────────────────────────────────────────────
   //
@@ -137,6 +142,7 @@ export function useGalleryData(config = {}) {
     availableLanguages, loadTranslations, translations,
     gallery, items, tags, partners, countries, languages, dynasties, glossary, timelines, timelineEvents,
     itemById, partnerById, countryById, tagById, dynastyById, timelineById, languageByCode,
+    countryIdForCode, countryLabel,
     itemRoute, partnerRoute, partnerObjectsRoute, itemFromUidPath, partnerFromKey,
     chromeImage, siblingGalleries, siblingUrl, pickSiblings,
   }

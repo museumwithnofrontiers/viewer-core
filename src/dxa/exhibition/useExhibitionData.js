@@ -4,6 +4,7 @@ import { useCatalogueData } from '../../composables/useCatalogueData.js'
 import { useDataPackage } from '../../composables/useDataPackage.js'
 import { byId, entityRef } from '../../composables/useEntities.js'
 import { projectLabel } from '../../conventions.js'
+import { useLegacyCountryCodes } from '../countryCodes.js'
 
 // The data layer every DXA exhibition site (the-use-of-colours-in-art,
 // water-in-islam, …) wrote for itself: the entities an exhibition reads,
@@ -134,6 +135,10 @@ export function useExhibitionData(config = {}) {
     return country ? labelOf('countries', country.id) : code
   }
 
+  // The legacy code both ways, the one table the collection and the
+  // timeline read.
+  const { countryIdForCode, countryLabel } = useLegacyCountryCodes({ countries, countryById, timelines, labelOf })
+
   /** The canonical item route: the package id, and no language in the path. */
   function itemRoute(item) {
     return { name: 'item', params: { id: item.id } }
@@ -236,7 +241,7 @@ export function useExhibitionData(config = {}) {
     tr, md, mdInline, mdStrip, labelOf, loadEnglish, availableLanguages, loadTranslations, translations,
     chromeImage,
     partnerById, countryById, tagById, dynastyById, glossaryById, languageByCode,
-    countryByCode, countryLabelFromCode,
+    countryByCode, countryLabelFromCode, countryIdForCode, countryLabel,
     itemRoute, isInstitution, partnerRoute, partnerObjectsRoute,
     isExploreRecord, projectName,
     exhibitionTitle, exhibitionSubtitle, exhibitionHeadline, bannerCaption,
