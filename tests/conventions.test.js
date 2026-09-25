@@ -159,4 +159,12 @@ describe('useFeaturedRecord', () => {
     expect(['o1', 'o2', 'o3', 'o4']).toContain(any.value.id)
     expect(useFeaturedRecord('places', { seed: 1 }).value).toBeNull()
   })
+
+  it('never picks a record the filter leaves out (a site’s own visible rule)', () => {
+    for (const seed of [1, 2, 3, 4, 5, 6, 7, 8]) {
+      const pick = useFeaturedRecord('objects', { seed, filter: (record) => record.id === 'o3' })
+      expect(pick.value.id).toBe('o3')
+    }
+    expect(useFeaturedRecord('objects', { seed: 1, filter: () => false }).value).toBeNull()
+  })
 })

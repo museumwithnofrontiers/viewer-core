@@ -1,3 +1,38 @@
+## 2.2.0 (2026-09-25)
+
+Part of M10 epic 5 (museumwithnofrontiers/inventory-app#2016), stories
+museumwithnofrontiers/inventory-app#2037 and #2040.
+
+### Added
+
+- **The catalogue data layer** (root, `src/catalogue/catalogue.js`), for a
+  catalogue site on the generic entries: the standalone products, and the
+  products scaffolded from `website-template`.
+  - `useCatalogue(options)`: `useCatalogueData`'s return, plus
+    - the catalogue entities and lookups;
+    - the item/country/partner/dynasty labels;
+    - the `item`/`partner` routes;
+    - `itemRow(item, meta)`, the one result row.
+  - `CATALOGUE_PAGE_SIZE` (20) and `CATALOGUE_DATE_MODE` (`'overlap'`),
+    named apart from `/dxa`'s `PAGE_SIZE`/`DATE_MODE`.
+  - `objectsAndMonumentsSummary`, the "[N objects, M monuments]" count.
+- **The field search** of legacy's `database.php` form
+  (`src/catalogue/fieldSearch.js`), which the three products each typed:
+  - `searchFields` (the haystacks), `searchFieldOptions` /
+    `useSearchFieldOptions` / `searchFieldLabel` (the field select);
+  - `searchRows` / `searchRowKeys` (the keyword rows the query carries);
+  - `searchedFor` / `searchSummary` (the "searched for" line and the
+    results summary);
+  - `useFieldSearch`, one long-lived index whose `narrow` is a results
+    spec's own.
+- `useFeaturedRecord(entity, { filter })`: a site's own visible rule, applied
+  before the pick. `useFeaturedRecord` reads the raw entity.
+
+### Changed
+
+- `partnerView()` reads `contact_persons` only. The `contact_person_1`/`_2`
+  fallback is gone: every published data package ships the list
+  (museumwithnofrontiers/inventory-app#2007, #2036).
 ## 2.1.0 (2026-09-25)
 
 Part of M10 epic 4 (museumwithnofrontiers/inventory-app#2015), story

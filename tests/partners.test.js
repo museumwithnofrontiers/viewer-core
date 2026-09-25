@@ -118,12 +118,10 @@ describe('partnerView', () => {
     expect(view.persons[0]).toEqual({ title: 'Director', name: 'A. First', phone: '+20 1', fax: '+20 2', email: 'first@example.org' })
   })
 
-  it('falls back to contact_person_1/_2 for a package built before contact_persons', () => {
-    const old = { ...partner, contact_persons: undefined, contact_person_1: { name: 'One' }, contact_person_2: null }
-    expect(partnerView(old, text, ctx).persons.map((p) => p.name)).toEqual(['One'])
-    // An empty list is the package saying "none", not a missing key.
-    const none = { ...partner, contact_persons: [], contact_person_1: { name: 'Stale' } }
-    expect(partnerView(none, text, ctx).persons).toEqual([])
+  it('reads contact_persons only: the legacy contact_person_1/_2 pair is gone (inventory-app#2007)', () => {
+    const old = { ...partner, contact_persons: undefined, contact_person_1: { name: 'One' } }
+    expect(partnerView(old, text, ctx).persons).toEqual([])
+    expect(partnerView({ ...partner, contact_persons: [] }, text, ctx).persons).toEqual([])
   })
 
   it('shows the partner fax next to the phone', () => {

@@ -118,14 +118,10 @@ const byDisplayOrder = (a, b) => (a?.display_order ?? 0) - (b?.display_order ?? 
 
 /**
  * The contact persons in legacy order (person 1 first), keeping only those
- * with a name or a title — legacy printed a person block only then. Reads
- * `contact_persons`; a package built before that list existed carries
- * `contact_person_1`/`_2` instead (inventory-app#2007 removes them).
+ * with a name or a title — legacy printed a person block only then.
  */
 function contactPersons(partner) {
-  const list = Array.isArray(partner?.contact_persons)
-    ? partner.contact_persons
-    : [partner?.contact_person_1, partner?.contact_person_2]
+  const list = Array.isArray(partner?.contact_persons) ? partner.contact_persons : []
   return list
     .filter((person) => person && (person.name || person.title))
     .map((person) => ({
