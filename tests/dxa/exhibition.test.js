@@ -1,5 +1,8 @@
 import { computed, ref } from 'vue'
-import { describe, expect, it } from 'vitest'
+import { beforeAll, describe, expect, it } from 'vitest'
+import { loadEntities } from '../../src/index.js'
+import { entityRef } from '../../src/composables/useEntities.js'
+import { useLegacyCountryCodes } from '../../src/dxa/countryCodes.js'
 import { useExhibitionCollection } from '../../src/dxa/exhibition/useExhibitionCollection.js'
 import { useExhibitionTimeline } from '../../src/dxa/exhibition/useExhibitionTimeline.js'
 import { useExhibitionPartner } from '../../src/dxa/exhibition/useExhibitionPartner.js'
@@ -41,18 +44,25 @@ const translationsByLang = {
   en: { 'item-1': { name: 'Glazed *bowl*', dates: '10th century', location: 'Cairo' }, 'item-2': { name: 'Lamp' } },
 }
 
-const timelines = ref([
-  { id: 'tl-eg', country_id: 'c-eg', source: 'mwnf3', backward_compatibility: 'mwnf3:hcr:country:eg' },
-  { id: 'tl-local', country_id: null, source: 'thg_local' },
-])
-const timelineEvents = ref([
-  { id: 'ev-1', timeline_id: 'tl-eg', country_id: 'c-eg', year_from: 950, display_order: 0 },
-  { id: 'ev-2', timeline_id: 'tl-local', country_id: null, year_from: 1400, display_order: 0 },
-])
+// The chronologies are the fixture package's (tests/fixtures/data-package):
+// viewer-core's `useTimelineEvents`, which the exhibition timeline builds
+// on, reads them from the entity store, as a site's data layer does. The
+// worldwide merge carries Egypt (ev1, ev2, and ev4 on an exhibition-bound
+// row) and Syria (ev3, the undated ev7); the `thg_local` row carries ev5 and
+// ev6, both in 1400.
+const timelines = entityRef('timelines')
+const timelineEvents = entityRef('timeline_events')
+beforeAll(() => loadEntities(['timelines', 'timeline_events']))
 
 const manifest = { projects: { 'proj-a': { name: { en: 'The Use of Colours in Art' } } } }
 
 function makeData(exhibitionOverrides = {}) {
+  const labelOf = (entity, id) => {
+    if (!id) return ''
+    if (entity === 'countries') return countryById.value.get(id)?.internal_name ?? id
+    if (entity === 'partners') return partnerById.value.get(id)?.internal_name ?? id
+    return id
+  }
   return {
     manifest,
     defaultLang: 'en',
@@ -63,12 +73,9 @@ function makeData(exhibitionOverrides = {}) {
     translations: () => ({}),
     mdInline: (s) => String(s).replace(/\*/g, ''),
     mdStrip: (s) => String(s).replace(/\*/g, ''),
-    labelOf: (entity, id) => {
-      if (!id) return ''
-      if (entity === 'countries') return countryById.value.get(id)?.internal_name ?? id
-      if (entity === 'partners') return partnerById.value.get(id)?.internal_name ?? id
-      return id
-    },
+    labelOf,
+    // What useExhibitionData() adds over the lists below.
+    ...useLegacyCountryCodes({ countries, countryById, timelines, labelOf }),
     itemRoute: (item) => ({ name: 'item', params: { id: item.id } }),
     projectName: (item, lang = 'en') => manifest.projects[item?.project_id]?.name?.[lang] ?? null,
     isHiddenPartner: (partner) => partner?.id === 'hidden-1',
@@ -122,7 +129,7 @@ describe('useExhibitionTimeline', () => {
     expect(timeline.hasTimeline.value).toBe(true)
     expect(timeline.timelineSpec.value.scope).toBe('local')
     // No country picker on the local-chronology shape.
-    expect(timeline.timelineCountries.value).toEqual([])
+    expect(timeline.timelineEvents.countries.value).toEqual([])
   })
 
   it('uses the worldwide country chronology when has_country_timeline is set', () => {
@@ -132,7 +139,7 @@ describe('useExhibitionTimeline', () => {
     expect(timeline.usesLocalTimeline.value).toBe(false)
     expect(timeline.hasTimeline.value).toBe(true)
     expect(timeline.timelineSpec.value.scope).toBe('country')
-    expect(timeline.timelineCountries.value.map((row) => row[0])).toEqual(['all', 'eg'])
+    expect(timeline.timelineEvents.countries.value.map((row) => row.value)).toEqual(['all', 'c-eg', 'c-sy'])
   })
 
   it('has no Timeline section at all when both chronology flags are false', () => {
@@ -145,13 +152,34 @@ describe('useExhibitionTimeline', () => {
     expect(timeline.usesLocalTimeline.value).toBe(true)
   })
 
-  it('finds the events for a country and year range, text and country name attached', () => {
+  it("finds a country's events on viewer-core's engine, by legacy code or id, texts attached", () => {
     const data = makeData({ has_timeline: true, has_country_timeline: true })
+    const timeline = useExhibitionTimeline(data, useExhibitionCollection(data))
+    expect(timeline.timelineEvents.findEvents({ country: 'eg' }).map((e) => e.id)).toEqual(['ev1', 'ev2', 'ev4'])
+    expect(timeline.timelineEvents.findEvents({ country: 'c-eg' }).map((e) => e.id)).toEqual(['ev1', 'ev2', 'ev4'])
+    // Legacy's overlap rule (`class.hcr.inc.php`), the one the gallery reads.
+    expect(timeline.timelineEvents.findEvents({ country: 'c-eg', begin: 900, end: 1000 }).map((e) => e.id)).toEqual(['ev1'])
+    expect(timeline.timelineEvents.findEvents({ country: 'c-eg' })[0].text).toEqual({})
+  })
+
+  it("reads the exhibition's own chronology alone when that is the section's", () => {
+    const data = makeData({ has_timeline: true, has_country_timeline: false })
+    const timeline = useExhibitionTimeline(data, useExhibitionCollection(data))
+    expect(timeline.timelineEvents.findEvents({}).map((e) => e.id)).toEqual(['ev6', 'ev5'])
+  })
+})
+
+describe('the legacy country code', () => {
+  it('is one table, the data layer\'s, read by the collection and the timeline alike', () => {
+    const data = makeData()
+    expect(data.countryIdForCode('eg')).toBe('c-eg')
+    expect(data.countryIdForCode('c-eg')).toBe('c-eg')
+    expect(data.countryIdForCode('all')).toBeNull()
+    expect(data.countryIdForCode('zz')).toBeNull()
+    expect(data.countryLabel('c-sy')).toBe('Syria')
     const collection = useExhibitionCollection(data)
-    const timeline = useExhibitionTimeline(data, collection)
-    const events = timeline.findEvents({ countryCode: 'eg', start: '', end: '' })
-    expect(events).toHaveLength(1)
-    expect(events[0].countryName).toBe('Egypt')
+    expect(collection.countryIdForCode).toBe(data.countryIdForCode)
+    expect(useExhibitionTimeline(data, collection).countryIdForCode).toBe(data.countryIdForCode)
   })
 })
 
@@ -237,8 +265,10 @@ describe('useExhibitionItemDetail', () => {
   it('sends the "search this period" link under the timeline controls\' own keys only (inventory-app#2022)', () => {
     const ctx = { t: (key) => key }
     const country = detailFor({ has_timeline: true, has_country_timeline: true }).related.timeline(items.value[0], ctx)
-    expect(country.defaultCountry()).toBe('eg')
-    expect(country.searchTo('eg', [900, 1000])).toEqual({ name: 'timeline-results', query: { country: 'eg', begin: 900, end: 1000 } })
+    expect(country.defaultCountry()).toBe('c-eg')
+    expect(country.countries[0]).toEqual({ value: 'all', label: 'timeline.form.allCountries' })
+    expect(country.events('c-eg').map((e) => e.id)).toEqual(['ev1'])
+    expect(country.searchTo('c-eg', [900, 1000])).toEqual({ name: 'timeline-results', query: { country: 'c-eg', begin: 900, end: 1000 } })
 
     // The exhibition's own chronology has no country control: the link
     // carries no country the results page would ignore.

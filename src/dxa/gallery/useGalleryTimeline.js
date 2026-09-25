@@ -1,4 +1,3 @@
-import { computed } from 'vue'
 import { dateRange, eraLabel, roundOutward, yearBucketsFromRange } from '../../catalogue/dates.js'
 import { useTimelineEvents } from '../../catalogue/timeline.js'
 import { PAGE_SIZE } from '../shared.js'
@@ -10,13 +9,13 @@ export { eraLabel, roundOutward }
  * `PAGE_SIZE`/`tile` its {@link import('./useGalleryCollection.js').useGalleryCollection}
  * already declared.
  *
- * Reads `data.timelines`, `data.countries`, `data.countryById`,
- * `data.labelOf`, `data.items`, `data.tr`, `data.loadTranslations`,
- * `data.defaultLang`. `config` carries nothing today.
+ * Reads `data.labelOf`, `data.items`, `data.tr`, `data.loadTranslations`,
+ * `data.defaultLang`, `data.countryIdForCode`, `data.countryLabel`.
+ * `config` carries nothing today.
  */
 export function useGalleryTimeline(data, collection, config = {}) {
   void config
-  const { timelines, countries, countryById, labelOf, items, tr, loadTranslations, defaultLang } = data
+  const { labelOf, items, tr, loadTranslations, defaultLang, countryIdForCode, countryLabel } = data
   const { tile } = collection
 
   // `TimelineResultsView` takes `tr` as a plain callback rather than an
@@ -28,96 +27,11 @@ export function useGalleryTimeline(data, collection, config = {}) {
 
   // The merge itself — the worldwide country chronology, `mwnf3.hcr`
   // combined with Sharing History's exhibition-2 rows the way legacy's
-  // `/v2/events` served it — is viewer-core's `useTimelineEvents`. What
-  // stays here is what is genuinely a gallery's own: the DXA legacy
-  // 2-letter country code (a gallery's Timeline URLs are keyed on it, not
-  // on the inventory id) and the two specs the composed views render from.
-  //
-  // Names and legacy codes both come from countries.json. The exporter
-  // scopes that file to "member item countries ∪ their holders' countries ∪
-  // the global timeline's countries", so it covers every timeline country —
-  // the `Intl.DisplayNames` fallback below is therefore dead code for them,
-  // and is kept only so a regressed package degrades to a rendered ISO code
-  // rather than a raw id. The `code` countries.json ships is the country's
-  // `backward_compatibility`, which is exactly the code legacy's own
-  // timeline URLs used, including the ones that are not ISO 3166-1
-  // alpha-2 (`uk`, `pa`, `qt`, `rm`, `sb`, `ua`, …). Those are the reason
-  // the fallback must stay unreachable rather than merely rare: read as
-  // ISO, `ua` is Ukraine and `sb` is the Solomon Islands, where legacy
-  // means the UAE and Serbia. Only countries.json can name them correctly.
-  const regionNames = (() => {
-    try {
-      return new Intl.DisplayNames(['en'], { type: 'region' })
-    } catch {
-      return null
-    }
-  })()
-
-  // Two legacy codes are not ISO 3166-1 alpha-2.
-  const LEGACY_TO_ISO = { uk: 'GB', pa: 'PS' }
-
-  // `TimelineResultsView`'s own country control (`countries` from
-  // viewer-core) writes the inventory id, not the legacy code
-  // (`?country=dza`, not `?country=dz`); `countryIdForCode` used to answer
-  // nothing for one, silently matching every event. Built once, next to
-  // `LEGACY_TO_ISO`, rather than inside the function it is read from.
-  const countryIdSet = computed(() => new Set(countries.value.map((c) => c.id)))
-
-  // A lookup, not a parse. The fallback exists only for the
-  // regressed-package case described above, and it must agree with
-  // GLOBAL_TIMELINE_LIKE_PATTERNS in the exporter's timeline exporter: the
-  // country sits after the literal `country` segment in BOTH keyspaces
-  // (`mwnf3:hcr:country:<cc>` and
-  // `mwnf3_sharing_history:sh_hcr:country:<cc>:exhibition:2`), and it is
-  // the last segment in only the first — taking the last one yields `2` on
-  // the second.
-  function legacyCodeOf(timeline) {
-    const fromPackage = countryById.value.get(timeline.country_id)?.code
-    if (fromPackage) return fromPackage
-    const parts = (timeline.backward_compatibility ?? '').split(':')
-    const at = parts.indexOf('country')
-    return (at >= 0 ? parts[at + 1] : null) || timeline.country_id
-  }
-
-  function nameFor(timeline) {
-    const fromPackage = countries.value.some((c) => c.id === timeline.country_id)
-      ? labelOf('countries', timeline.country_id)
-      : null
-    if (fromPackage) return fromPackage
-    const legacy = legacyCodeOf(timeline)
-    const iso = LEGACY_TO_ISO[legacy] ?? String(legacy).toUpperCase()
-    try {
-      return regionNames?.of(iso) ?? iso
-    } catch {
-      return iso
-    }
-  }
-
-  /** Display name for a country the chronology carries, keyed by inventory id. */
-  function countryLabel(countryId) {
-    if (countries.value.some((c) => c.id === countryId)) return labelOf('countries', countryId)
-    const timeline = timelines.value.find((t) => t.country_id === countryId)
-    return timeline ? nameFor(timeline) : countryId
-  }
-
-  /**
-   * Legacy 2-letter code → the inventory country id the events are keyed
-   * by. A country served by both chronologies has two rows carrying the
-   * same code and the same `country_id`, so either row answers.
-   */
-  function countryIdForCode(code) {
-    if (!code || code === 'all') return null
-    // Already an id (the composed view's own control writes one): pass it
-    // through unchanged, before the legacy-code lookups below get a chance
-    // to find nothing and silently match every event.
-    if (countryIdSet.value.has(code)) return code
-    const timeline = timelines.value.find((t) => legacyCodeOf(t) === code)
-    if (timeline) return timeline.country_id
-    // Countries with no chronology still reach here from the collection
-    // page's "Timeline for this Search" link, which uses countries.json's
-    // own codes.
-    return countries.value.find((c) => c.code === code)?.id ?? null
-  }
+  // `/v2/events` served it — is viewer-core's `useTimelineEvents`, and the
+  // DXA legacy 2-letter country code a gallery's Timeline URLs are keyed on
+  // is the data layer's (`countryIdForCode`, `countryLabel`). What stays
+  // here is what is genuinely a gallery's own: the two specs the composed
+  // views render from.
 
   /**
    * The one merge engine every Timeline page on a gallery shares —

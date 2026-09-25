@@ -1,3 +1,36 @@
+## 2.4.0 (2026-09-25)
+
+Part of M10 epic 6 (museumwithnofrontiers/inventory-app#2017), story
+museumwithnofrontiers/inventory-app#2056: the family layer builds on the
+shared engines instead of repeating them.
+
+### Changed (`/dxa`)
+
+- **One legacy country-code table.** `countryIdForCode` was defined four
+  times: in both families' collection and timeline composables, the
+  collections' copies weaker than the timelines' (no id pass-through, no
+  timeline codes). It is `useLegacyCountryCodes` now, built once by
+  `useGalleryData`/`useExhibitionData`, which return `countryIdForCode` and
+  `countryLabel`; the collection and the timeline composables read those and
+  still return them.
+- **`useExhibitionTimeline` builds on `useTimelineEvents`,** as
+  `useGalleryTimeline` already did, instead of rebuilding its event pool,
+  country list and search. It returns `timelineEvents`, the engine its flags
+  put in force (the worldwide merge, or its own `thg_local` chronology), and
+  the item page's "Timeline for this item" popout reads it the way the
+  gallery's does. Visible on an exhibition's item page: the popout's events
+  follow legacy's overlap rule (`class.hcr.inc.php`) instead of the start
+  year alone, its "all countries" entry is translated
+  (`timeline.form.allCountries`), and its country values, and the "search
+  this period" link, carry the inventory id, which the results page reads as
+  it reads a legacy code.
+
+### Removed
+
+- `useExhibitionTimeline`'s `timelineCountries`, `findEvents` and
+  `timelineCountryName`, superseded by `timelineEvents` and `countryLabel`.
+  Only the exhibitions' own `sheet.js` read them, and no exhibition carries
+  it since the family pages moved into viewer-layout 2.18.0.
 ## 2.3.0 (2026-09-25)
 
 Part of M10 epic 6 (museumwithnofrontiers/inventory-app#2017), stories
