@@ -1,3 +1,31 @@
+## 2.1.0 (2026-09-25)
+
+Part of M10 epic 4 (museumwithnofrontiers/inventory-app#2015), story
+museumwithnofrontiers/inventory-app#2031.
+
+### Added
+
+- `partnerView(partner, text, ctx)` (root, `src/record/partners.js`): the
+  view-model of one partner, which `@museumwnf/viewer-layout`'s upcoming
+  `PartnerPanel` renders in every family. What it settles once, for every site:
+  - contact persons come from `contact_persons`, in legacy order, keeping those
+    with a name or a title (a package built before that list falls back to
+    `contact_person_1`/`_2`; the fallback goes with those keys,
+    inventory-app#2007);
+  - the partner's own fax is part of the contact block;
+  - a picture's caption is its `alt_text` (the DXA pages read a `captions`
+    map the package never carries);
+  - a website with no scheme gets `https://` (decided 2026-09-25); a scheme
+    other than `http(s)` never reaches a link;
+  - a hidden partner keeps its name and loses both links.
+
+### Changed
+
+- `useGallerySheet` / `useExhibitionSheet`: the `museum` row stays when the
+  item has holder text but its partner is not in the package — its value is
+  then the holder text. `@museumwnf/viewer-layout`'s `RecordSheetView` up to
+  2.15 renders that text as it is; from the next minor it shows the holder
+  text and the partner's summary (decision D3).
 # Changelog
 
 ## 2.0.0 (2026-09-21)

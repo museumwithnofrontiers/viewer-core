@@ -45,8 +45,12 @@ export function useExhibitionSheet(data, config = {}) {
     { key: 'name', label: 'sheet.field.name', value: 'name' },
     { key: 'aka', label: 'sheet.field.alsoKnownAs', value: 'alternate_name' },
     { key: 'location', label: 'sheet.field.location', value: (c) => [c.text.location, labelOf('countries', c.record.country_id)].filter(Boolean).join(', ') },
-    // A link to the partner's page, rendered by the wrapper's `museum` slot.
-    { key: 'museum', label: 'sheet.field.holdingMuseum', value: (c) => (partnerById.value.get(c.record.partner_id) ? c.record.partner_id : ''), render: 'custom' },
+    // The holding museum, rendered by the wrapper's `museum` slot: the item's
+    // holder text, then the partner it refers to (decision D3,
+    // inventory-app#2015). The value is the partner's id when the package
+    // carries the partner, otherwise the holder text, so the row stays for an
+    // item whose holder has no partner page.
+    { key: 'museum', label: 'sheet.field.holdingMuseum', value: (c) => (partnerById.value.get(c.record.partner_id) ? c.record.partner_id : (c.text.holder ?? '')), render: 'custom' },
     { key: 'originalOwner', label: 'sheet.field.originalOwner', value: 'initial_owner' },
     { key: 'currentOwner', label: 'sheet.field.currentOwner', value: 'owner' },
     { key: 'date', label: 'sheet.field.date', value: 'dates' },

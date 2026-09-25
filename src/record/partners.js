@@ -10,6 +10,15 @@
 // nowhere: legacy nested an associated partner under the main partner it
 // belongs to, and the port flattened that into the country column instead.
 // `partnerHierarchy` is that relationship, read once.
+//
+// `partnerView` is what every rendering of one partner reads — a list line,
+// the summary under an item's holder, the partner page — built once here so
+// the contact block, the contact persons and the picture captions are read
+// the same way on every site. A partner is one type in every exporter family
+// (decision D4 of inventory-app#1699); what differs by family is only what
+// `ctx` carries.
+
+import { md as mdBlock, mdInline as mdInlineDefault, mdStrip as mdStripDefault } from '../i18n/markdown.js'
 
 /**
  * Whether `record` counts as a main (rather than associated) partner.
@@ -84,4 +93,137 @@ export function partnerHierarchy(partners) {
     },
     roots,
   }
+}
+
+// ── One partner, for rendering ───────────────────────────────────────────────
+
+/**
+ * A partner's website or extra link, as an address a link can use. A value
+ * with no scheme (`www.example.org`, about a quarter of the packages' links)
+ * gets `https://` (decided 2026-09-25, inventory-app#2031); `http://` and
+ * `https://` are kept as they are. Any other scheme (`javascript:`, `data:`,
+ * `mailto:`) is not a website and yields `''`, so it never reaches an `href`.
+ * A port after a bare host (`host:8080`) is not a scheme.
+ */
+function websiteUrl(value) {
+  const url = String(value ?? '').trim()
+  if (!url) return ''
+  if (/^https?:\/\//i.test(url)) return url
+  if (url.startsWith('//')) return `https:${url}`
+  if (/^[a-z][a-z0-9+.-]*:(?!\d)/i.test(url)) return ''
+  return `https://${url}`
+}
+
+const byDisplayOrder = (a, b) => (a?.display_order ?? 0) - (b?.display_order ?? 0)
+
+/**
+ * The contact persons in legacy order (person 1 first), keeping only those
+ * with a name or a title — legacy printed a person block only then. Reads
+ * `contact_persons`; a package built before that list existed carries
+ * `contact_person_1`/`_2` instead (inventory-app#2007 removes them).
+ */
+function contactPersons(partner) {
+  const list = Array.isArray(partner?.contact_persons)
+    ? partner.contact_persons
+    : [partner?.contact_person_1, partner?.contact_person_2]
+  return list
+    .filter((person) => person && (person.name || person.title))
+    .map((person) => ({
+      title: person.title ?? '',
+      name: person.name ?? '',
+      phone: person.phone ?? '',
+      fax: person.fax ?? '',
+      email: person.email ?? '',
+    }))
+}
+
+/**
+ * The view-model of one partner: what viewer-layout's `PartnerPanel` renders
+ * in each of its variants, and what any other rendering of a partner reads.
+ *
+ * `partner` is a `partners.json` record; `text` its translation in the
+ * language shown (`{ name, description, city, address, phone, fax, email,
+ * website }`). `ctx` carries what differs by family, nothing else:
+ *
+ * - `countryLabel(countryId)` — the country's name;
+ * - `md`, `mdInline`, `mdStrip` — the renderers, when the site binds its
+ *   own (a glossary); the package's by default;
+ * - `route(partner)` — the partner's own page;
+ * - `objectsRoute(partner)` — the page of the items it holds;
+ * - `hidden(partner)` — a partner with no page of its own (the exhibitions'
+ *   rule): it keeps its name, and loses both links.
+ *
+ * Text is rendered once here: `name` and `description` are HTML (inline and
+ * block), `address` is block HTML; every other field is plain text.
+ */
+export function partnerView(partner, text = {}, ctx = {}) {
+  if (!partner) return null
+  const t = text ?? {}
+  const {
+    countryLabel = (id) => (id ?? ''),
+    md = mdBlock,
+    mdInline = mdInlineDefault,
+    mdStrip = mdStripDefault,
+    route = null,
+    objectsRoute = null,
+    hidden = null,
+  } = ctx
+
+  const source = String(t.name ?? partner.internal_name ?? partner.id)
+  const plainName = mdStrip(source)
+  const city = t.city ? String(t.city) : ''
+  const country = partner.country_id ? (countryLabel(partner.country_id) ?? '') : ''
+  const isHidden = hidden ? Boolean(hidden(partner)) : false
+  const itemCount = partner.item_count ?? 0
+  const website = websiteUrl(t.website)
+  const links = (partner.additional_urls ?? [])
+    .map((link) => ({ url: websiteUrl(link?.url), label: link?.title || link?.url || '' }))
+    .filter((link) => link.url)
+  const hasMap = Number.isFinite(partner.latitude) && Number.isFinite(partner.longitude)
+
+  const view = {
+    id: partner.id,
+    type: partner.type ?? '',
+    name: mdInline(source),
+    plainName,
+    city,
+    country,
+    location: [city, country].filter(Boolean).join(', '),
+    logos: [...(partner.logos ?? [])].sort(byDisplayOrder).map((logo) => ({
+      url: logo.url,
+      alt: logo.alt_text || plainName,
+      type: logo.logo_type ?? '',
+    })),
+    // A partner's pictures carry `alt_text`, not the per-language
+    // `captions` an item's images do: the alt text is the caption.
+    pictures: [...(partner.images ?? [])].sort(byDisplayOrder).map((picture) => ({
+      url: picture.url,
+      alt: picture.alt_text || plainName,
+      caption: picture.alt_text ?? '',
+      photographer: picture.photographer ?? '',
+      copyright: picture.copyright ?? '',
+    })),
+    description: md(t.description ?? ''),
+    contact: {
+      address: md(t.address ?? ''),
+      phone: t.phone ?? '',
+      fax: t.fax ?? '',
+      email: t.email ?? '',
+      website: website ? { url: website, label: String(t.website).trim() } : null,
+      links,
+    },
+    persons: contactPersons(partner),
+    map: hasMap
+      ? { latitude: partner.latitude, longitude: partner.longitude, zoom: partner.map_zoom ?? 15, label: plainName }
+      : null,
+    itemCount,
+    hidden: isHidden,
+    route: !isHidden && route ? (route(partner) ?? null) : null,
+    objectsRoute: !isHidden && itemCount && objectsRoute ? (objectsRoute(partner) ?? null) : null,
+  }
+  view.hasContact = Boolean(
+    view.contact.address || view.contact.phone || view.contact.fax || view.contact.email
+      || view.contact.website || view.contact.links.length || view.persons.length,
+  )
+  return view
 }
