@@ -11,6 +11,29 @@ Texts are handled here, without an i18n library: see [Texts](#texts). Nothing in
 the platform depends on `vue-i18n` any more, and this package no longer asks for
 it.
 
+## Entry points and layers
+
+Each entry point belongs to one layer of the platform's
+[architecture reference](https://github.com/museumwithnofrontiers/inventory-app/issues/1510), which says what goes where across
+all the packages:
+
+| Entry | Layer | Holds |
+| --- | --- | --- |
+| `@museumwnf/viewer-core` | engine and data layer | the application factory, the router and the texts runtime; the **data layer** — how a site reads its data package ([records](#records-useentities-the-standard-way-a-website-reads-them), [a website's data composable](#a-websites-data-composable), [`useDataPackage`](#usedatapackage--data-access-the-only-allowed-way-to-read-the-data-package)); the engines of list pages, timelines and record pages; the view-model builders the blocks of `@museumwnf/viewer-layout` are fed with ([record pages](#record-pages), [collection trees](#collection-trees), [partners](#partners)) |
+| `@museumwnf/viewer-core/dxa` | DXA family layer | the data composables of the gallery and the exhibition families ([below](#museumwnfviewer-coredxa)) |
+| `@museumwnf/viewer-core/legacy` | legacy address mapping | pure functions decoding `backward_compatibility` for legacy URL shapes |
+| `@museumwnf/viewer-core/testing` | a website's tests | the shared smoke-test kit ([Testing a website](#testing-a-website)) |
+| `@museumwnf/viewer-core/vite` | a website's build | `defineViewerConfig` |
+
+The root is generic: every kind of website reads its data through it — the
+standalone products, the scaffold of `website-template`, and the DXA
+family's own composables. A composable only the galleries or the
+exhibitions use belongs under `/dxa`, never in the root. The dependency runs
+one way: the root, `/legacy`, `/testing` and `/vite` never import from
+`/dxa`, and `/dxa` builds only on what the root and `/legacy` publish. A
+function that moves between entries keeps its old export as an alias until
+the websites have moved; a major release then removes it.
+
 ## Install
 
 Published to npmjs (`registry.npmjs.org`), publicly — no authentication needed
@@ -494,16 +517,21 @@ needs it; the standalone sites never import it.
 
 ### `@museumwnf/viewer-core/dxa`
 
-The gallery/exhibition-pair composables the four live DXA sites each wrote
-for themselves — `useCollection`/`useGalleryData`, the timeline, the
-partner specs and the item sheet — byte-identical within each pair
-(carpets/amulets — a gallery; the-use-of-colours-in-art/water-in-islam — an
-exhibition). Promoted here per family, never as one composable that papers
-over the two: the cross-family diff is real behaviour (the exhibition
-shape's per-language-build 404 gate, its own local-vs-country timeline
-switch, its manifest-driven citation line), confirmed file by file against
-both pairs' `origin/main` (epic metanull/inventory-app#1730). A separate
-entry point because only a gallery/exhibition site needs it.
+This entry is the data half of the DXA family layer; the family's pages are
+in `@museumwnf/viewer-layout/dxa`. The galleries are one site with different
+data, and so are the exhibitions — the legacy served each family from one
+application — so what is the same on every site of a family lives here
+once instead of in each site.
+
+What may go here: a composable or a constant that only the gallery or the
+exhibition family uses, and that is the same on every site of that family,
+including the data instance each site of the family builds from these
+composables. Each family keeps its own composables, never one that papers
+over the two: the difference between the families is real behaviour (the
+exhibition's per-language-build 404 gate, its own local-vs-country timeline
+switch, its manifest-driven citation line). A difference between two sites
+of one family is a `config` value, not a copy. Nothing outside `/dxa`
+imports from it; it builds only on what the root and `/legacy` publish.
 
 A site composes its own data/catalogue/timeline/partner/sheet module from
 these, threading the `data` object one family's
@@ -724,12 +752,12 @@ The package exports shared smoke-test helpers at @museumwnf/viewer-core/testing:
 | checkRoutes(config, { names, legacyPaths }) | Verify every route has a name, no route is a catch-all, and expected names and legacy paths are present. Returns the list of problems found. |
 | checkSectionMeta(config) | Verify every route has a meta.section string (used by the menu to highlight the current page). Returns the list of problems found. |
 | checkTextsRendered(host, { namespaces }) | Match text keys in the rendered host against a regex like /\b(ns1\|ns2)\.[a-z]/i. Returns the list of namespaces found (empty if none). |
-| defineViewerConfig({ dataPackage, inline, plugins, root }) | Return a Vite config object the seven websites share: the @inventory-data alias, optimizeDeps to inline viewer packages, testTimeout of 60s, and the test environment. Exported from `@museumwnf/viewer-core/vite` for use in `vite.config.js` (separate entry because Vite's config loader runs under Node.js, which cannot parse `.vue` files; the `/testing` barrel reaches a `.vue` file). dataPackage is the npm package name; inline is an optional array of extra packages; plugins is the Vite plugins array (e.g. @vitejs/plugin-vue); root is the project root path (default `process.cwd()`), used to resolve the data package from the project root. |
+| defineViewerConfig({ dataPackage, inline, plugins, root }) | Return the Vite config object every website shares: the @inventory-data alias, optimizeDeps to inline viewer packages, testTimeout of 60s, and the test environment. Exported from `@museumwnf/viewer-core/vite` for use in `vite.config.js` (separate entry because Vite's config loader runs under Node.js, which cannot parse `.vue` files; the `/testing` barrel reaches a `.vue` file). dataPackage is the npm package name; inline is an optional array of extra packages; plugins is the Vite plugins array (e.g. @vitejs/plugin-vue); root is the project root path (default `process.cwd()`), used to resolve the data package from the project root. |
 | checkOfferedLanguages(config) | Check that the website offers only languages with content, in the declared order, with labels on the switcher. Returns the list of problems found. |
 
 @museumwnf/viewer-core/testing is not imported by websites, only by their tests. A website test might be:
 
-\\\js
+```js
 import { checkOfferedLanguages, checkRoutes, checkSectionMeta, mountSite } from '@museumwnf/viewer-core/testing'
 import config from '../src/dataset.config.js'
 import { mergeMessages } from '@museumwnf/viewer-core'
@@ -747,7 +775,8 @@ describe('smoke test', () => {
     app.unmount()
   })
 })
-\\\
+```
+
 ## Licence
 
 This package is Content of the MWNF Website under the [MWNF legal
@@ -759,5 +788,10 @@ notice text also ships in this package as `LICENSE.md`.
 ## Release procedure
 
 1. Merge to `main` via PR (CI: tests + a downstream build of every website).
-2. Create a GitHub release with tag `vX.Y.Z` — CI publishes to GitHub Packages; never publish from a laptop.
+2. Create a GitHub release with tag `vX.Y.Z` — CI publishes to npmjs through
+   trusted publishing; never publish from a laptop.
 3. Semver rules: **patch** = fix; **minor** = backward-compatible addition; **major** = breaking change (breaking = any change requiring an edit in a consuming website).
+
+Websites receive a release through the platform's propagation run — see
+[MAINTENANCE.md](https://github.com/museumwithnofrontiers/viewer-workflows/blob/main/MAINTENANCE.md)
+in `viewer-workflows`.
