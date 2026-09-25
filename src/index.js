@@ -1,6 +1,13 @@
 export { createViewer } from './createViewer.js'
 export { createStandardViewer } from './createStandardViewer.js'
 export { useCatalogueData } from './composables/useCatalogueData.js'
+export {
+  CATALOGUE_DATE_MODE, CATALOGUE_PAGE_SIZE, objectsAndMonumentsSummary, useCatalogue,
+} from './catalogue/catalogue.js'
+export {
+  searchFieldLabel, searchFieldOptions, searchFields, searchRowKeys, searchRows, searchSummary, searchedFor,
+  useFieldSearch, useSearchFieldOptions,
+} from './catalogue/fieldSearch.js'
 export { useDataPackage } from './composables/useDataPackage.js'
 export { byId, entityRef, loadEntities, useEntities } from './composables/useEntities.js'
 export { resolveRecordLanguage, useRecordLanguage } from './composables/useRecordLanguage.js'

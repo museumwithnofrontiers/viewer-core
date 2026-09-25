@@ -470,14 +470,14 @@ under the main partner it belongs to.
 | --- | --- |
 | `groupByCountry(records, { label, tier?, order = 'asc' })` | `[{ country, label, main, associated }]`, one entry per distinct `country_id`, sorted by `label`. `label(country)` names a group's country, the same shape as a facet's `label(value)`. `tier` names the field that marks a main partner (the converged shape's `level`); a record is associated only when its tier value is a non-empty value other than `'partner'` (legacy values: `'associated_partner'`, `'minor_contributor'`); `null`, `undefined`, `''`, or `'partner'` mean main. Without a `tier` every record is main, which is the DXA lists' plain grouping. Partners keep the order `records` was given in within each tier. |
 | `partnerHierarchy(partners)` | `{ children(id), parentOf(id), roots }` from `parent_id`: `children(id)` a partner's associated partners, `parentOf(id)` the main partner it belongs to (or null), `roots` every partner with no parent in the list or whose `parent_id` points outside it. |
-| `partnerView(partner, text, ctx)` | The view-model every rendering of one partner reads — `@museumwnf/viewer-layout`'s `PartnerPanel` in each of its variants: `{ id, type, name (inline HTML), plainName, city, country, location, logos: [{ url, alt, type }], pictures: [{ url, alt, caption, photographer, copyright }], description (block HTML), contact: { address (block HTML), phone, fax, email, website: { url, label } \| null, links: [{ url, label }] }, persons: [{ title, name, phone, fax, email }], hasContact, map: { latitude, longitude, zoom, label } \| null, itemCount, hidden, route, objectsRoute }`. `text` is the partner's translation in the language shown. `ctx` carries only what differs by family: `countryLabel(id)`, the renderers (`md`, `mdInline`, `mdStrip`, the package's by default), `route(partner)`, `objectsRoute(partner)` and `hidden(partner)` (a hidden partner keeps its name and loses both links). Contact persons come from `contact_persons`, in order, keeping those with a name or a title. A picture's caption is its `alt_text`. A website or link with no scheme gets `https://`; any scheme other than `http(s)` is dropped. |
+| `partnerView(partner, text, ctx)` | The view-model every rendering of one partner reads — `@museumwnf/viewer-layout`'s `PartnerPanel` in each of its variants: `{ id, type, name (inline HTML), plainName, city, country, location, logos: [{ url, alt, type }], pictures: [{ url, alt, caption, photographer, copyright }], description (block HTML), contact: { address (block HTML), phone, fax, email, website: { url, label } \| null, links: [{ url, label }] }, persons: [{ title, name, phone, fax, email }], hasContact, map: { latitude, longitude, zoom, label } \| null, itemCount, hidden, route, objectsRoute }`. `text` is the partner's translation in the language shown. `ctx` carries only what differs by family: `countryLabel(id)`, the renderers (`md`, `mdInline`, `mdStrip`, the package's by default), `route(partner)`, `objectsRoute(partner)` and `hidden(partner)` (a hidden partner keeps its name and loses both links). Contact persons come from `contact_persons`, in order, keeping those with a name or a title (the legacy `contact_person_1`/`_2` pair is not read). A picture's caption is its `alt_text`. A website or link with no scheme gets `https://`; any scheme other than `http(s)` is dropped. |
 
 ### Conventions
 
 | Export | Meaning |
 | --- | --- |
 | `useSection()` | the `meta.section` of the current route — see Routing |
-| `useFeaturedRecord(entity, { withImage = true, seed })` | one record at random for a landing page's spotlight, among those with an image; null until the entity is loaded; `seed` pins the pick |
+| `useFeaturedRecord(entity, { withImage = true, seed, filter })` | one record at random for a landing page's spotlight, among those with an image; null until the entity is loaded; `seed` pins the pick; `filter(record)` applies a site's own visible rule first |
 | `sectionMeta(chrome = [])` | returns `meta(section, ...entities) => ({ section, entities: [...chrome, ...entities] })` — a route's `meta` in one call, `chrome` being the entities every page of the site loads regardless of which one it is |
 | `mwnfLinks` | the portal and sibling-site addresses the four DXA configs each repeat under `links` — frozen, spread into a site's own `links` rather than retyped |
 
@@ -637,6 +637,49 @@ export const { tr, md, mdInline, mdStrip, labelOf, loadEnglish } = catalogue
 | `entity(name)` | `entityRef(name)`'s records, narrowed by `visible[name]` when one is declared; `null` until that entity's chunk has arrived, the same as `entityRef` |
 | `index(name, key = 'id')` | a `Map` of `entity(name)`'s records by `key` — the visible ones, unlike `byId` |
 | `availableLanguages`, `loadTranslations`, `translations` | the package's own, re-exported so a site reads everything through the one object |
+
+### The catalogue data layer
+
+`useCatalogue` is `useCatalogueData` plus what a catalogue site — a
+standalone product, or a new product scaffolded from `website-template` —
+otherwise re-types for itself: the catalogue entities, their lookups, the
+labels, the routes and the one result row. A site calls it once, in its
+`data.js`, and keeps next to it only what is its own (a scope rule, a
+collection tree, its legacy address mappings).
+
+```js
+import { useCatalogue } from '@museumwnf/viewer-core'
+
+export const data = useCatalogue({
+  eager: ['items', 'countries', 'partners', 'dynasties', 'glossary'],
+  visible: { items: (item) => item.display_status !== 'N' },
+})
+data.loadEnglish()
+
+export const { items, itemRow, countryLabel, tr, md, mdInline } = data
+```
+
+| Export | Meaning |
+| --- | --- |
+| `useCatalogue(options)` | `useCatalogueData(options)`'s own return, plus: `items`, `countries`, `partners`, `dynasties` (the visible records, `null` until loaded); `itemById` (every item, the visible rule not applied — for a page that deliberately shows a hidden one), `partnerById`, `countryById`, `dynastyById`; `itemLabel(item)`, `countryLabel(id)`, `partnerLabel(id)`, `dynastyLabel(id)` (plain text, `''` for nothing); `itemRoute(item)`, `partnerRoute(partner)` (the `item`/`partner` routes by name); `itemRow(item, meta = ['country', 'dates'])` — the row `RecordList`/`RecordGrid`/`RelatedRecords` share, `meta` naming what follows the name in order: `'country'`, `'dates'`, `'location'`, `'dynasties'`, `'holder'` (the partner, only when the package carries it), or a function `(item, text) => string` |
+| `CATALOGUE_PAGE_SIZE`, `CATALOGUE_DATE_MODE` | `20` and `'overlap'`: the standalone pages' size and date rule (decision D5) — named apart from `/dxa`'s `PAGE_SIZE`/`DATE_MODE` (`9`, `'contain'`), which a DXA site imports next to this root |
+| `objectsAndMonumentsSummary({ matching, t })` | legacy's "[N objects, M monuments]", a results spec's `summary` |
+
+The field search of the legacy `database.php` form — keyword rows each
+naming a field, folded with AND/OR — around `useKeywordIndex`'s `fields`
+grammar:
+
+| Export | Meaning |
+| --- | --- |
+| `searchFields({ dynastyLabel })` | the haystack of each field, as legacy's form searched it: `keyword`, `name`, `location`, `provenance`, `patron`, `artist`, `material`, `other`, and `dynasty` when a `dynastyLabel` is given |
+| `searchFieldOptions(fields)` | `[{ key, label }]` (entry names), in legacy's order, for the fields `fields` carries — `SearchFormView`'s `fields` |
+| `useSearchFieldOptions(fields)`, `searchFieldLabel(key, t)` | the same resolved, `[{ value, label }]`, for a select a site draws itself; one field's label |
+| `searchRows(filters, count = 4)`, `searchRowKeys(count = 4)` | the keyword rows the query carries (`q`/`field`, then `qN`/`fieldN`/`opN`), and their query keys for a results spec's `keys` |
+| `searchedFor(filters, t, { rows, extras })`, `searchSummary(ctx, options)` | the "Name: "bowl" · OR Location: "Cairo" · From 900 · Language: FR" line — `extras`, `(filters, t) => string`, append a site's own parts — and the results summary built on it (what was searched, or all items; then the count) |
+| `useFieldSearch({ fields, entity = 'items', rows = 4, rank = 'hits', expand })` | one long-lived index (the glossary and country expansions by default), its search language following the query's `lang`; `narrow(list, filters)` is a results spec's `narrow` — the matches in rank order, kept to the scoped `list`. Pass `sort: false` to the spec. |
+
+`useFeaturedRecord(entity, { filter })` narrows the candidates by a site's
+own visible rule first: it reads the raw entity.
 
 ### Routing
 

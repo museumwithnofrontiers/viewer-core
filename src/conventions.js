@@ -108,13 +108,16 @@ function seeded(seed) {
  * among those with an image when `withImage` is set (the default), among
  * all when none has one. Null until the entity is loaded. The pick is made
  * once per visit and again only when the records change; `seed` makes it
- * deterministic.
+ * deterministic. `filter(record)` narrows the candidates first — the site's
+ * own visible rule, since this reads the raw entity (Sharing History's
+ * hidden illustrations, `display_status: 'N'`, must never be picked).
  */
-export function useFeaturedRecord(entity, { withImage = true, seed, images = 'images' } = {}) {
+export function useFeaturedRecord(entity, { withImage = true, seed, images = 'images', filter } = {}) {
   const records = entityRef(entity)
   const random = seed == null ? Math.random : seeded(seed)
   return computed(() => {
-    const all = toValue(records) ?? []
+    const loaded = toValue(records)
+    const all = filter ? (loaded ?? []).filter(filter) : loaded ?? []
     if (all.length === 0) return null
     const pool = withImage ? all.filter((record) => (record?.[images]?.length ?? 0) > 0) : all
     const candidates = pool.length > 0 ? pool : all
