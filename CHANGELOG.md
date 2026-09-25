@@ -1,3 +1,26 @@
+## 2.3.0 (2026-09-25)
+
+Part of M10 epic 6 (museumwithnofrontiers/inventory-app#2017), stories
+museumwithnofrontiers/inventory-app#2052, #2053 and #2054: the data half of the
+family pages that move into viewer-layout's `/dxa`.
+
+### Added (`/dxa`)
+
+- `useExhibitionThemes(data)`: an exhibition's themes, which each of the six
+  exhibitions carried as `themes.js`, `useThemePresentation.js` and
+  `useThemePictures.js`. It holds the themes.json tree and its tour order, the
+  About theme, legacy's route ids and Roman numerals, the picture selections
+  and their parent records, and `useThemePictures(node)`.
+- `buildThemePictures` and `romanFor`, the pure halves, exported for tests and
+  for a site's own page.
+- `useExhibitionItemDetail(data, timeline)` and
+  `useGalleryItemDetail(data, timeline)`: each family's item-page spec for
+  `RecordSheetView`, which each site carried in its own `sheet.js` /
+  `gallery.js`. The site's `projectColors` and `noticeProjects` are read
+  through `useSiteConfig()`, lazily, in both families. An exhibition record
+  with no project gets the `mwnf-chip--Explore` chip. The exhibition's "search
+  this period" link carries only the timeline controls' own keys, so a local
+  timeline receives no country it would ignore (#2022).
 ## 2.2.0 (2026-09-25)
 
 Part of M10 epic 5 (museumwithnofrontiers/inventory-app#2016), stories

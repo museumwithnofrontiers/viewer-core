@@ -4,6 +4,8 @@ import { useExhibitionCollection } from '../../src/dxa/exhibition/useExhibitionC
 import { useExhibitionTimeline } from '../../src/dxa/exhibition/useExhibitionTimeline.js'
 import { useExhibitionPartner } from '../../src/dxa/exhibition/useExhibitionPartner.js'
 import { useExhibitionSheet } from '../../src/dxa/exhibition/useExhibitionSheet.js'
+import { useExhibitionItemDetail } from '../../src/dxa/exhibition/useExhibitionItemDetail.js'
+import { setSiteConfig } from '../../src/siteConfig.js'
 
 // The exhibition family's spec composables, over a small hand-built `data`
 // object shaped like the return value of `useExhibitionData()` — no data
@@ -70,6 +72,8 @@ function makeData(exhibitionOverrides = {}) {
     itemRoute: (item) => ({ name: 'item', params: { id: item.id } }),
     projectName: (item, lang = 'en') => manifest.projects[item?.project_id]?.name?.[lang] ?? null,
     isHiddenPartner: (partner) => partner?.id === 'hidden-1',
+    isExploreRecord: (item) => !item?.project_id,
+    dynastyById: computed(() => new Map()),
     partnerRoute: (partner) => ({ name: 'partner', params: { id: partner.id } }),
     countries,
     tags,
@@ -189,5 +193,56 @@ describe('useExhibitionSheet', () => {
   it('the related heading and action label are the exhibition\'s own entry names', () => {
     expect(sheet.itemSheet.related.heading).toBe('exhibition.related.objects')
     expect(sheet.itemSheet.related.actionLabel).toBe('exhibition.action.seeDatabaseEntry')
+  })
+})
+
+describe('useExhibitionItemDetail', () => {
+  function detailFor(exhibitionOverrides) {
+    const data = makeData(exhibitionOverrides)
+    const timeline = useExhibitionTimeline(data, useExhibitionCollection(data))
+    return useExhibitionItemDetail(data, timeline).itemDetail
+  }
+
+  it('is the field sheet, plus the blocks the item view reads', () => {
+    const detail = detailFor()
+    expect(detail.fields.find((f) => f.key === 'museum')).toBeTruthy()
+    expect(detail.related.heading).toBe('exhibition.related.objects')
+    expect(detail.related.title).toBe('exhibition.related.title')
+    expect(detail.notice.label).toBe('exhibition.item.explorePartnerNote')
+  })
+
+  it("reads the chip and the notice from the site's config, and gives a record with no project the Explore chip", () => {
+    setSiteConfig({ projectColors: { 'proj-a': 'mwnf-chip--EXH' }, noticeProjects: ['proj-b'] })
+    const detail = detailFor()
+    expect(detail.sourceDatabase.chipClass(items.value[0])).toBe('mwnf-chip--EXH')
+    expect(detail.sourceDatabase.chipClass(items.value[1])).toBe('mwnf-chip--Explore')
+    expect(detail.sourceDatabase.chipClass({ project_id: 'proj-unknown' })).toBeNull()
+    expect(detail.related.outsideChip({ project_id: 'proj-a' })).toBe('mwnf-chip--EXH')
+    expect(detail.notice.show({ project_id: 'proj-b' })).toBe(true)
+    expect(detail.notice.show(items.value[0])).toBe(false)
+  })
+
+  it('links the museum unless the partner is hidden', () => {
+    const detail = detailFor()
+    expect(detail.museum.route('p-1')).toEqual({ name: 'partner', params: { id: 'p-1' } })
+    expect(detail.museum.route('not-in-package')).toBeNull()
+  })
+
+  it('withholds the timeline popout when the exhibition has no chronology or the item no date', () => {
+    const ctx = { t: (key) => key }
+    expect(detailFor({ has_timeline: false, has_country_timeline: false }).related.timeline(items.value[0], ctx)).toBeNull()
+    expect(detailFor({ has_timeline: true, has_country_timeline: true }).related.timeline(items.value[1], ctx)).toBeNull()
+  })
+
+  it('sends the "search this period" link under the timeline controls\' own keys only (inventory-app#2022)', () => {
+    const ctx = { t: (key) => key }
+    const country = detailFor({ has_timeline: true, has_country_timeline: true }).related.timeline(items.value[0], ctx)
+    expect(country.defaultCountry()).toBe('eg')
+    expect(country.searchTo('eg', [900, 1000])).toEqual({ name: 'timeline-results', query: { country: 'eg', begin: 900, end: 1000 } })
+
+    // The exhibition's own chronology has no country control: the link
+    // carries no country the results page would ignore.
+    const local = detailFor({ has_timeline: true, has_country_timeline: false }).related.timeline(items.value[0], ctx)
+    expect(local.searchTo('all', [900, 1000])).toEqual({ name: 'timeline-results', query: { begin: 900, end: 1000 } })
   })
 })

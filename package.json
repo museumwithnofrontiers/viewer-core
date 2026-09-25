@@ -1,6 +1,6 @@
 {
   "name": "@museumwnf/viewer-core",
-  "version": "2.2.0",
+  "version": "2.3.0",
   "description": "Application engine for MWNF websites: turns a dataset.config.js into a mounted Vue application.",
   "type": "module",
   "license": "SEE LICENSE IN LICENSE.md",

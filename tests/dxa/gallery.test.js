@@ -4,6 +4,8 @@ import { useGalleryCollection } from '../../src/dxa/gallery/useGalleryCollection
 import { useGalleryTimeline } from '../../src/dxa/gallery/useGalleryTimeline.js'
 import { useGalleryPartner } from '../../src/dxa/gallery/useGalleryPartner.js'
 import { useGallerySheet } from '../../src/dxa/gallery/useGallerySheet.js'
+import { useGalleryItemDetail } from '../../src/dxa/gallery/useGalleryItemDetail.js'
+import { setSiteConfig } from '../../src/siteConfig.js'
 
 // The gallery family's spec composables, over a small hand-built `data`
 // object shaped like the return value of `useGalleryData()` — no data
@@ -208,5 +210,49 @@ describe('useGallerySheet', () => {
   it('the related tile carries the country and a stripped justification', () => {
     const tile = sheet.itemSheet.related.record({ record: items.value[1], justification: '*Same workshop*' })
     expect(tile.meta).toEqual(['Syria', 'Same workshop'])
+  })
+})
+
+describe('useGalleryItemDetail', () => {
+  function detail() {
+    const data = {
+      ...makeData(),
+      dynastyById: computed(() => new Map(dynasties.value.map((d) => [d.id, d]))),
+      partnerRoute: (partner) => ({ name: 'partner', params: { id: partner.id } }),
+    }
+    const timeline = useGalleryTimeline(data, useGalleryCollection(data))
+    return useGalleryItemDetail(data, timeline).itemDetail
+  }
+
+  it('is the field sheet, plus the blocks the item view reads, under the gallery entries', () => {
+    const d = detail()
+    expect(d.fields.length).toBeGreaterThan(0)
+    expect(d.related.title).toBe('gallery.related.title')
+    expect(d.related.notInPackageLabel).toBe('gallery.results.notInThisGallery')
+    expect(d.notice.label).toBe('gallery.item.explorePartnerNote')
+  })
+
+  it("reads the chips and the notice from the site's config, lazily", () => {
+    const d = detail()
+    setSiteConfig({ projectColors: { 'proj-a': 'mwnf-chip--DCA' }, noticeProjects: ['proj-e'] })
+    expect(d.sourceDatabase.chipClass(items.value[0])).toBe('mwnf-chip--DCA')
+    expect(d.sourceDatabase.chipClass(items.value[1])).toBeNull()
+    expect(d.related.outsideChip({ project_id: 'proj-a' })).toBe('mwnf-chip--DCA')
+    expect(d.notice.show({ project_id: 'proj-e' })).toBe(true)
+  })
+
+  it('links the museum when the package carries the partner', () => {
+    const d = detail()
+    expect(d.museum.route('p-1')).toEqual({ name: 'partner', params: { id: 'p-1' } })
+    expect(d.museum.route('p-unknown')).toBeNull()
+  })
+
+  it('offers a dynasty popout only for a dynasty with a history, and no timeline for an undated item', () => {
+    const d = detail()
+    expect(d.related.dynasties(items.value[0], 'en')).toBeNull()
+    expect(d.related.timeline(items.value[1], { t })).toBeNull()
+    const popout = d.related.timeline(items.value[0], { t })
+    expect(popout.range).toEqual([900, 1000])
+    expect(popout.searchTo('eg', [900, 1000])).toEqual({ name: 'timeline-results', query: { country: 'eg', begin: 900, end: 1000 } })
   })
 })
