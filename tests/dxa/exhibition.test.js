@@ -172,6 +172,15 @@ describe('useExhibitionSheet', () => {
   const data = makeData()
   const sheet = useExhibitionSheet(data)
 
+  it('keeps the holding-museum row for holder text with no partner in the package', () => {
+    const museumField = sheet.itemSheet.fields.find((f) => f.key === 'museum')
+    expect(museumField.render).toBe('custom')
+    expect(museumField.value({ record: items.value[0], text: { holder: 'Museum One' } })).toBe('p-1')
+    const orphan = { ...items.value[0], partner_id: null }
+    expect(museumField.value({ record: orphan, text: { holder: 'A private collection' } })).toBe('A private collection')
+    expect(museumField.value({ record: orphan, text: {} })).toBe('')
+  })
+
   it('the citation carries a project line, unlike the gallery shape', () => {
     expect(sheet.itemSheet.citation.project(items.value[0], { language: 'en' })).toBe('The Use of Colours in Art')
     expect(sheet.itemSheet.citation.permalink).toBe(false)

@@ -184,6 +184,16 @@ describe('useGallerySheet', () => {
     expect(museumField.render).toBe('custom')
   })
 
+  it('keeps the holding-museum row for holder text with no partner in the package', () => {
+    const museumField = sheet.itemSheet.fields.find((f) => f.key === 'museum')
+    // The partner is in the package: the row carries its id.
+    expect(museumField.value({ record: items.value[0], text: { holder: 'Museum One, Cairo' } })).toBe('p-1')
+    // It is not: the row carries the holder text, and stays.
+    const orphan = { ...items.value[0], partner_id: 'p-missing' }
+    expect(museumField.value({ record: orphan, text: { holder: 'A private collection' } })).toBe('A private collection')
+    expect(museumField.value({ record: orphan, text: {} })).toBe('')
+  })
+
   it('resolves the dynasty names field from the translated dynasty list', () => {
     const dynastyField = sheet.itemSheet.fields.find((f) => f.key === 'dynasty')
     const ctx = { record: items.value[0], language: 'en' }
