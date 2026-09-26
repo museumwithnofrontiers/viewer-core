@@ -236,7 +236,7 @@ describe('useExhibitionItemDetail', () => {
     expect(detail.fields.find((f) => f.key === 'museum')).toBeTruthy()
     expect(detail.related.heading).toBe('exhibition.related.objects')
     expect(detail.related.title).toBe('record.related.title')
-    expect(detail.notice.label).toBe('exhibition.item.explorePartnerNote')
+    expect(detail.notice.label).toBe('partner.item.explorePartnerNote')
   })
 
   it("reads the chip and the notice from the site's config, and gives a record with no project the Explore chip", () => {

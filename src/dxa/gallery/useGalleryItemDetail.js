@@ -83,7 +83,7 @@ export function useGalleryItemDetail(data, timeline) {
     },
     notice: {
       show: (record) => (useSiteConfig().noticeProjects ?? []).includes(record.project_id),
-      label: 'gallery.item.explorePartnerNote',
+      label: 'partner.item.explorePartnerNote',
     },
     museum: {
       route: (partnerId) => museumRoute(partnerId),
