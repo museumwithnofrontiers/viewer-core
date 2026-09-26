@@ -1,3 +1,14 @@
+## 2.5.1 (2026-09-26)
+
+Part of M10 epic 8 (museumwithnofrontiers/inventory-app#2019), story
+museumwithnofrontiers/inventory-app#2062.
+
+### Fixed (`/dxa`)
+
+- The item page's Explore-partner notice reads the shared
+  `partner.item.explorePartnerNote` in place of `gallery.item.explorePartnerNote`
+  / `exhibition.item.explorePartnerNote`, which said the same and which 2.5.0
+  left behind. Every text reads as it did.
 ## 2.5.0 (2026-09-26)
 
 Part of M10 epic 8 (museumwithnofrontiers/inventory-app#2019), story

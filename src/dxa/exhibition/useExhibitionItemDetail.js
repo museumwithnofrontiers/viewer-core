@@ -79,7 +79,7 @@ export function useExhibitionItemDetail(data, timeline) {
 
     notice: {
       show: (record) => (useSiteConfig().noticeProjects ?? []).includes(record.project_id),
-      label: 'exhibition.item.explorePartnerNote',
+      label: 'partner.item.explorePartnerNote',
     },
 
     // A hidden museum keeps its name on the sheet and loses the link: it has

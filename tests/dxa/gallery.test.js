@@ -233,7 +233,7 @@ describe('useGalleryItemDetail', () => {
     expect(d.fields.length).toBeGreaterThan(0)
     expect(d.related.title).toBe('record.related.title')
     expect(d.related.notInPackageLabel).toBe('gallery.results.notInThisGallery')
-    expect(d.notice.label).toBe('gallery.item.explorePartnerNote')
+    expect(d.notice.label).toBe('partner.item.explorePartnerNote')
   })
 
   it("reads the chips and the notice from the site's config, lazily", () => {
