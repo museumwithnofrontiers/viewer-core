@@ -66,7 +66,7 @@ export function useGalleryPartner(data, collection, config = {}) {
     pageSize: PAGE_SIZE,
     variant: 'grid',
     recordRoute: 'item',
-    actionLabel: 'gallery.action.seeDatabaseEntry',
+    actionLabel: 'catalogue.results.seeDatabaseEntry',
     empty: 'gallery.partner.noObjects',
     pagination: { jump: true },
     record: (item, { t }) => tile(item, t),

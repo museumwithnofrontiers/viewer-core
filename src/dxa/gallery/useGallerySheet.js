@@ -105,7 +105,7 @@ export function useGallerySheet(data, config = {}) {
     related: {
       variant: 'grid',
       heading: 'record.related.items',
-      actionLabel: 'gallery.action.seeDatabaseEntry',
+      actionLabel: 'catalogue.results.seeDatabaseEntry',
       record: ({ record: other, justification }) => ({
         id: other.id,
         image: other.images?.[0]?.url ?? '',

@@ -156,14 +156,14 @@ export function useExhibitionCollection(data, config = {}) {
     pageSize: PAGE_SIZE,
     variant: 'grid',
     recordRoute: 'item',
-    actionLabel: 'exhibition.action.seeDatabaseEntry',
+    actionLabel: 'catalogue.results.seeDatabaseEntry',
     empty: 'catalogue.results.noResults',
     pagination: { jump: true },
 
     record: (item, { t }) => tile(item, t),
 
     summary: ({ filters, pageInfo, t }) => [
-      { label: t('exhibition.section.collection'), value: filterSummary(filters, t) },
+      { label: t('core.section.collection'), value: filterSummary(filters, t) },
       { count: pageInfo.total, value: `${t('catalogue.results.outOf')} ${itemById.value.size} ${t('catalogue.results.objects')}` },
     ],
   }

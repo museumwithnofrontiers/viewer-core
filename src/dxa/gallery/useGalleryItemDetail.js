@@ -61,7 +61,7 @@ export function useGalleryItemDetail(data, timeline) {
     const [from, to] = roundOutward(record.start_date, record.end_date)
     if (from == null) return null
     return {
-      heading: 'gallery.section.timeline',
+      heading: 'core.section.timeline',
       countries: timelineCountries.value.map((c) => ({ value: c.value, label: c.label ?? ctx.t('timeline.form.allCountries') })),
       defaultCountry: () => {
         for (const { value: code } of timelineCountries.value) {
@@ -91,16 +91,16 @@ export function useGalleryItemDetail(data, timeline) {
     },
     related: {
       ...platformSheet.related,
-      title: 'gallery.related.title',
-      description: 'gallery.related.description',
+      title: 'record.related.title',
+      description: 'record.related.description',
       notInPackageLabel: 'gallery.results.notInThisGallery',
       // An outside `related_items` reference carries its `project_id`
       // (inventory-app#1807), so it reads the same `projectColors` map.
       outsideChip: chipClass,
-      artisticIntroductionLabel: 'gallery.nav.artisticIntroduction',
-      databaseLabel: 'gallery.search.relatedDatabase',
-      overallDatabase: { label: 'gallery.search.overallDatabase', linkLabel: 'gallery.nav.overallDatabase' },
-      onDisplayIn: { linkPendingLabel: 'gallery.item.linkPending' },
+      artisticIntroductionLabel: 'core.nav.artisticIntroduction',
+      databaseLabel: 'catalogue.search.relatedDatabase',
+      overallDatabase: { label: 'catalogue.search.overallDatabase', linkLabel: 'core.nav.overallDatabase' },
+      onDisplayIn: { linkPendingLabel: 'record.related.linkPending' },
       dynasties: (record, language) => itemDynasties(record, language),
       timeline: itemTimeline,
     },

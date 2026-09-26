@@ -95,14 +95,14 @@ export function useExhibitionItemDetail(data, timeline) {
 
     related: {
       ...platformSheet.related,
-      title: 'exhibition.related.title',
-      description: 'exhibition.related.description',
+      title: 'record.related.title',
+      description: 'record.related.description',
       outsideChip: (ref) => chipClass(ref),
       notInPackageLabel: 'exhibition.results.notInThisExhibition',
-      artisticIntroductionLabel: 'exhibition.nav.artisticIntroduction',
-      databaseLabel: 'exhibition.search.relatedDatabase',
-      overallDatabase: { label: 'exhibition.search.overallDatabase', linkLabel: 'exhibition.nav.overallDatabase' },
-      onDisplayIn: { linkPendingLabel: 'exhibition.item.linkPending' },
+      artisticIntroductionLabel: 'core.nav.artisticIntroduction',
+      databaseLabel: 'catalogue.search.relatedDatabase',
+      overallDatabase: { label: 'catalogue.search.overallDatabase', linkLabel: 'core.nav.overallDatabase' },
+      onDisplayIn: { linkPendingLabel: 'record.related.linkPending' },
       dynasties: (record, language) => ({
         records: dynastiesWithHistory(record, language),
         tr: (d) => dynastyTr(d, language),
@@ -115,7 +115,7 @@ export function useExhibitionItemDetail(data, timeline) {
         const range = roundOutward(record.start_date, record.end_date)
         if (range[0] == null) return null
         return {
-          heading: 'exhibition.section.timeline',
+          heading: 'core.section.timeline',
           countries: timelineCountries.value.map((c) => ({ value: c.value, label: c.label ?? ctx.t('timeline.form.allCountries') })),
           defaultCountry: () => countryOf(record.country_id) ?? 'all',
           events: (country) => findEvents({ country, begin: range[0], end: range[1] }),
