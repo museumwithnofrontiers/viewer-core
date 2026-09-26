@@ -112,7 +112,7 @@ export function useGalleryTimeline(data, collection, config = {}) {
     pageSize: PAGE_SIZE,
     variant: 'grid',
     recordRoute: 'item',
-    actionLabel: 'gallery.action.seeDatabaseEntry',
+    actionLabel: 'catalogue.results.seeDatabaseEntry',
     empty: 'gallery.results.noObjectsInPeriod',
     pagination: { jump: true },
 

@@ -1,3 +1,20 @@
+## 2.5.0 (2026-09-26)
+
+Part of M10 epic 8 (museumwithnofrontiers/inventory-app#2019), story
+museumwithnofrontiers/inventory-app#2062. Requires `@museumwnf/viewer-i18n`
+4.5.0 (the shared entries it names).
+
+### Changed (`/dxa`)
+
+- The family specs read the shared entries in place of the
+  `gallery.*`/`exhibition.*` twins that said the same: the item page's related
+  block (`record.related.title`, `.description`, `.linkPending`), its database
+  links (`catalogue.search.relatedDatabase`, `.overallDatabase`,
+  `core.nav.overallDatabase`, `core.nav.artisticIntroduction`), the section
+  titles (`core.section.collection`, `.timeline`) and every "See Database
+  Entry" action (`catalogue.results.seeDatabaseEntry`). Every text reads as
+  it did.
+
 ## 2.4.0 (2026-09-25)
 
 Part of M10 epic 6 (museumwithnofrontiers/inventory-app#2017), story

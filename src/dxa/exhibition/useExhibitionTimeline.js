@@ -144,7 +144,7 @@ export function useExhibitionTimeline(data, collection, config = {}) {
     pageSize: PAGE_SIZE,
     variant: 'grid',
     recordRoute: 'item',
-    actionLabel: 'exhibition.action.seeDatabaseEntry',
+    actionLabel: 'catalogue.results.seeDatabaseEntry',
     empty: 'exhibition.results.noObjectsInPeriod',
     record: (item, { t }) => tile(item, t),
     summary: ({ filters, pageInfo, t }) => [

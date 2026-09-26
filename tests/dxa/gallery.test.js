@@ -231,7 +231,7 @@ describe('useGalleryItemDetail', () => {
   it('is the field sheet, plus the blocks the item view reads, under the gallery entries', () => {
     const d = detail()
     expect(d.fields.length).toBeGreaterThan(0)
-    expect(d.related.title).toBe('gallery.related.title')
+    expect(d.related.title).toBe('record.related.title')
     expect(d.related.notInPackageLabel).toBe('gallery.results.notInThisGallery')
     expect(d.notice.label).toBe('gallery.item.explorePartnerNote')
   })

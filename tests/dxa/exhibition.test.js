@@ -220,7 +220,7 @@ describe('useExhibitionSheet', () => {
 
   it('the related heading and action label are the exhibition\'s own entry names', () => {
     expect(sheet.itemSheet.related.heading).toBe('exhibition.related.objects')
-    expect(sheet.itemSheet.related.actionLabel).toBe('exhibition.action.seeDatabaseEntry')
+    expect(sheet.itemSheet.related.actionLabel).toBe('catalogue.results.seeDatabaseEntry')
   })
 })
 
@@ -235,7 +235,7 @@ describe('useExhibitionItemDetail', () => {
     const detail = detailFor()
     expect(detail.fields.find((f) => f.key === 'museum')).toBeTruthy()
     expect(detail.related.heading).toBe('exhibition.related.objects')
-    expect(detail.related.title).toBe('exhibition.related.title')
+    expect(detail.related.title).toBe('record.related.title')
     expect(detail.notice.label).toBe('exhibition.item.explorePartnerNote')
   })
 

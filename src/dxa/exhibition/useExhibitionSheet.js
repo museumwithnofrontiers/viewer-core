@@ -113,7 +113,7 @@ export function useExhibitionSheet(data, config = {}) {
     related: {
       variant: 'grid',
       heading: 'exhibition.related.objects',
-      actionLabel: 'exhibition.action.seeDatabaseEntry',
+      actionLabel: 'catalogue.results.seeDatabaseEntry',
       record: ({ record: other, justification }) => ({
         id: other.id,
         image: other.images?.[0]?.url ?? '',

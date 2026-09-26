@@ -153,14 +153,14 @@ export function useGalleryCollection(data, config = {}) {
     pageSize: PAGE_SIZE,
     variant: 'grid',
     recordRoute: 'item',
-    actionLabel: 'gallery.action.seeDatabaseEntry',
+    actionLabel: 'catalogue.results.seeDatabaseEntry',
     empty: 'catalogue.results.noResults',
     pagination: { jump: true },
 
     record: (item, { t }) => tile(item, t),
 
     summary: ({ filters, pageInfo, t, total }) => [
-      { label: t('gallery.section.collection'), value: filterSummary(filters, t) },
+      { label: t('core.section.collection'), value: filterSummary(filters, t) },
       { count: pageInfo.total, value: `${t('catalogue.results.outOf')} ${total} ${t('catalogue.results.objects')}` },
     ],
   }
