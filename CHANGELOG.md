@@ -1,3 +1,16 @@
+## 2.5.2 (2026-09-30)
+
+Fixes museumwithnofrontiers/viewer-core#123, found in M11
+(museumwithnofrontiers/inventory-app milestone 19).
+
+### Fixed
+
+- A navigation that changes both the page and `?lang=` lands on the page it
+  names. The language watcher rewrote the URL of the page being left while the
+  navigation was under way, which cancelled it: the visitor stayed there, in
+  the new language. A language switched to while a page loads is now written
+  into that page's URL once it lands.
+
 ## 2.5.1 (2026-09-26)
 
 Part of M10 epic 8 (museumwithnofrontiers/inventory-app#2019), story

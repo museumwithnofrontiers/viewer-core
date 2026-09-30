@@ -1,6 +1,9 @@
-import { beforeEach, describe, expect, it } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { ref } from 'vue'
+import { createMemoryHistory, createRouter } from 'vue-router'
 import {
   applyDocumentLanguage,
+  connectLanguageToRouter,
   isRtl,
   negotiateLanguage,
   readStoredLanguage,
@@ -74,5 +77,64 @@ describe('the remembered choice', () => {
     expect(readStoredLanguage()).toBe(null)
     expect(() => storeLanguage('fr')).not.toThrow()
     Object.defineProperty(globalThis, 'localStorage', { configurable: true, value: storage })
+  })
+})
+
+describe('the language in the URL', () => {
+  beforeEach(() => localStorage.clear())
+
+  const Page = { render: () => null }
+
+  // A multilingual website's router, opened on `/a`. `/slow` loads its page
+  // only when the test lets it, so a navigation can be caught under way.
+  async function connect() {
+    let release
+    const loading = new Promise((resolve) => (release = () => resolve(Page)))
+    const router = createRouter({
+      history: createMemoryHistory(),
+      routes: [
+        { path: '/a', component: Page },
+        { path: '/b', component: Page },
+        { path: '/slow', component: () => loading },
+      ],
+    })
+    const locale = ref('en')
+    connectLanguageToRouter({ locale, offered: ['en', 'fr', 'de'], router })
+    await router.push('/a')
+    return { router, locale, release }
+  }
+
+  it('is added to the first page', async () => {
+    const { router } = await connect()
+    expect(router.currentRoute.value.fullPath).toBe('/a?lang=en')
+  })
+
+  it('follows the visitor switching language', async () => {
+    const { router, locale } = await connect()
+    locale.value = 'de'
+    await vi.waitFor(() => expect(router.currentRoute.value.fullPath).toBe('/a?lang=de'))
+  })
+
+  it('changes with the page when a link names both', async () => {
+    // The guard switches the language for the page the link names. The
+    // language watcher used to rewrite the URL of the page being left before
+    // that navigation landed, which cancelled it: the visitor stayed where
+    // they were, in the new language.
+    const { router, locale } = await connect()
+    await router.push('/b?lang=fr')
+    await vi.waitFor(() => expect(router.currentRoute.value.query.lang).toBe('fr'))
+    expect(router.currentRoute.value.path).toBe('/b')
+    expect(locale.value).toBe('fr')
+  })
+
+  it('keeps a language the visitor switches to while a page loads', async () => {
+    const { router, locale, release } = await connect()
+    const arriving = router.push('/slow')
+    await new Promise((resolve) => setTimeout(resolve))
+    locale.value = 'de'
+    await new Promise((resolve) => setTimeout(resolve))
+    release()
+    await arriving
+    await vi.waitFor(() => expect(router.currentRoute.value.fullPath).toBe('/slow?lang=de'))
   })
 })

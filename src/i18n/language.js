@@ -93,7 +93,16 @@ export function resolveInitialLanguage(offered) {
 export function connectLanguageToRouter({ locale, offered, router }) {
   const multilingual = offered.length > 1
 
+  // The navigation under way, from the guard until it lands. Its URL already
+  // carries the language the guard set; rewriting the page being left
+  // instead cancels it, and the visitor stays there in the new language.
+  let pending = null
+  const settle = (to) => {
+    if (pending === to) pending = null
+  }
+
   router.beforeEach((to) => {
+    pending = to
     const next = negotiateLanguage(offered, {
       requested: multilingual ? to.query.lang : undefined,
       stored: readStoredLanguage(),
@@ -107,18 +116,28 @@ export function connectLanguageToRouter({ locale, offered, router }) {
     return true
   })
 
-  // A change of language from the switcher rewrites the URL. Not before the
-  // first navigation has resolved, though: the router is then still at its
-  // start location, `/`, and a replace from there cancels the navigation the
-  // visitor arrived with — every deep link landed on the home page. The guard
-  // above puts the language in the URL of that first navigation itself.
+  router.afterEach((to, from, failure) => {
+    settle(to)
+    // The visitor switched language while this page loaded.
+    if (!failure && multilingual && to.query.lang !== locale.value) {
+      router.replace({ query: { ...to.query, lang: locale.value } })
+    }
+  })
+  router.onError((error, to) => settle(to))
+
+  // A change of language from the switcher rewrites the URL. Not while a
+  // navigation is under way (see `pending`), and so not before the first one
+  // has resolved: the router is then still at its start location, `/`, and a
+  // replace from there cancels the navigation the visitor arrived with, so
+  // every deep link landed on the home page. The guard above puts the
+  // language in the URL of that first navigation itself.
   watch(
     locale,
     (code) => {
       applyDocumentLanguage(code)
       storeLanguage(code)
       const current = router.currentRoute.value
-      if (multilingual && current !== START_LOCATION && current.query.lang !== code) {
+      if (multilingual && !pending && current !== START_LOCATION && current.query.lang !== code) {
         router.replace({ query: { ...current.query, lang: code } })
       }
     },
