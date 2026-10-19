@@ -206,6 +206,21 @@ describe('useGallerySheet', () => {
     expect(dynastyField.value(ctx)).toBe('Fatimid dynasty')
   })
 
+  it("prints legacy's free-text Period / Dynasty line over the linked names", () => {
+    const dynastyField = sheet.itemSheet.fields.find((f) => f.key === 'dynasty')
+    const ctx = { record: items.value[0], language: 'en', text: { dynasty: 'Fatimid period, 10th century' } }
+    expect(dynastyField.value(ctx)).toBe('Fatimid period, 10th century')
+    expect(dynastyField.value({ ...ctx, text: { dynasty: '' } })).toBe('Fatimid dynasty')
+  })
+
+  it("puts the artist's life data on a line under the artist, as DatabaseItem.vue did", () => {
+    const artistField = sheet.itemSheet.fields.find((f) => f.key === 'artist')
+    const text = { artist_birthdate: '1520', artist_birthplace: 'Iznik', artist_deathdate: '1580' }
+    expect(artistField.value({ record: items.value[0], text })).toBe('A. Potter  \n1520, Iznik - 1580')
+    expect(artistField.value({ record: items.value[0], text: {} })).toBe('A. Potter')
+    expect(artistField.value({ record: items.value[1], text: {} })).toBe('')
+  })
+
   it('citation has no permalink and no per-project line, unlike the exhibition shape', () => {
     expect(sheet.itemSheet.citation).toEqual({ permalink: false, heading: 'record.citation.ofThisPage' })
     expect(sheet.itemSheet.citation.project).toBeUndefined()

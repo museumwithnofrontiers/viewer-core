@@ -152,3 +152,53 @@ export function timelineLinkFor(record, { name = 'timeline-results', keys = {}, 
   if (to != null) query[keys.end ?? 'end'] = String(to)
   return { name, query }
 }
+
+// ── Legacy's sheet lines ───────────────────────────────────────────────────
+//
+// How legacy's sheets printed a value, written once so each website prints
+// it the way its own legacy did.
+
+/**
+ * `text` without the period(s) that end it, as legacy's `removeEndingPoint`
+ * printed most sheet values — sparing a period after "C", as in "B.C.".
+ * Anything but a string comes back as ''.
+ */
+export function removeEndingPoint(text) {
+  if (typeof text !== 'string') return ''
+  return text.replace(/([^C])\.+\s*$/, '$1')
+}
+
+const lifePart = (value) => (typeof value === 'string' ? value.trim() : '')
+
+/**
+ * The artist line as Markdown: `artist`, then the artist's life data the
+ * record's translation carries (`artist_birthdate`, `artist_birthplace`,
+ * `artist_deathdate`, `artist_deathplace`), each part only when set and
+ * joined exactly as legacy joined it, in one of legacy's two shapes:
+ *
+ * - `'bracketed'` — Baroque Art's and Sharing History's `database_item.php`:
+ *   on the artist's line, after a no-break space,
+ *   `Name (1660, Chemnitz-1736, Augsburg)`; a missing birth date keeps the
+ *   comma before the place, as it did there. Nothing without an artist.
+ * - `'line'` — the galleries' and exhibitions' `DatabaseItem.vue`
+ *   (`returnArtistData`): on a line of its own under the artist,
+ *   `1660, Chemnitz - 1736, Augsburg`.
+ *
+ * Islamic Art's sheet printed the artist alone. '' when there is nothing
+ * to print.
+ */
+export function artistLine(artist, text, { style = 'bracketed' } = {}) {
+  const name = lifePart(artist)
+  const born = lifePart(text?.artist_birthdate)
+  const bornAt = lifePart(text?.artist_birthplace)
+  const died = lifePart(text?.artist_deathdate)
+  const diedAt = lifePart(text?.artist_deathplace)
+  if (style === 'line') {
+    const birth = [born, bornAt].filter(Boolean).join(', ')
+    const death = [died, diedAt].filter(Boolean).join(', ')
+    return [name, [birth, death].filter(Boolean).join(' - ')].filter(Boolean).join('  \n')
+  }
+  if (!name) return ''
+  if (!(born || bornAt || died || diedAt)) return name
+  return `${name} (${born}${bornAt ? `, ${bornAt}` : ''}${died ? `-${died}` : ''}${diedAt ? `, ${diedAt}` : ''})`
+}

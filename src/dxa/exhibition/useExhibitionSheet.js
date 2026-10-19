@@ -21,6 +21,13 @@
 // collapsed behind a toggle (the view's, folded after the description);
 // when only one exists it is relabelled plain "Description". EPM records
 // are the common case of the latter.
+//
+// The artist's life data goes on a line under the artist, and the Period /
+// Dynasty row is legacy's free-text line (`dynasty`); the record's linked
+// dynasties stand in when it has none, and keep their own popouts
+// (decision D5, inventory-app#2233).
+
+import { artistLine } from '../../record/derivations.js'
 
 /**
  * The exhibition's item-sheet spec, over its data layer's `data`.
@@ -54,14 +61,14 @@ export function useExhibitionSheet(data, config = {}) {
     { key: 'originalOwner', label: 'sheet.field.originalOwner', value: 'initial_owner' },
     { key: 'currentOwner', label: 'sheet.field.currentOwner', value: 'owner' },
     { key: 'date', label: 'sheet.field.date', value: 'dates' },
-    { key: 'artist', label: 'sheet.field.artists', value: (c) => c.record.artist_names, join: ', ' },
+    { key: 'artist', label: 'sheet.field.artists', value: (c) => artistLine((c.record.artist_names ?? []).join(', '), c.text, { style: 'line' }) },
     { key: 'scribe', label: 'sheet.field.scribe', value: 'scriber' },
     { key: 'workshop', label: 'sheet.field.workshop', value: 'workshop' },
     { key: 'type', label: 'sheet.field.type', value: 'type' },
     { key: 'inventoryNumber', label: 'sheet.field.inventoryNumber', value: (c) => c.record.owner_reference },
     { key: 'materials', label: 'sheet.field.materials', value: (c) => c.text.materials, join: '; ' },
     { key: 'dimensions', label: 'sheet.field.dimensions', value: 'dimensions' },
-    { key: 'dynasty', label: 'sheet.field.periodDynasty', value: dynastyNames },
+    { key: 'dynasty', label: 'sheet.field.periodDynasty', value: (c) => c.text?.dynasty || dynastyNames(c) },
     { key: 'production', label: 'sheet.field.placeOfProduction', value: 'place_of_production' },
     { key: 'provenance', label: 'sheet.field.provenance', value: 'provenance' },
     { key: 'binding', label: 'sheet.field.binding', value: 'binding_desc' },

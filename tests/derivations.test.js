@@ -1,8 +1,8 @@
 import { beforeAll, describe, expect, it } from 'vitest'
 import { ref } from 'vue'
 import {
-  citation, loadEntities, relatedRecords, searchGlossary, timelineLinkFor, useDataPackage,
-  useGlossaryPopup, useRelatedRecords,
+  artistLine, citation, loadEntities, relatedRecords, removeEndingPoint, searchGlossary, sheetRows, timelineLinkFor,
+  useDataPackage, useGlossaryPopup, useRelatedRecords,
 } from '../src/index.js'
 
 beforeAll(async () => {
@@ -103,5 +103,45 @@ describe('timelineLinkFor', () => {
   it('is nothing for a record with neither country nor date', () => {
     expect(timelineLinkFor({ id: 'x' })).toBeNull()
     expect(timelineLinkFor(null)).toBeNull()
+  })
+})
+
+describe('removeEndingPoint', () => {
+  it('drops the periods that end a text, sparing one after C, as in B.C.', () => {
+    expect(removeEndingPoint('Umayyad period. ')).toBe('Umayyad period')
+    expect(removeEndingPoint('100 B.C.')).toBe('100 B.C.')
+    expect(removeEndingPoint('No period')).toBe('No period')
+    expect(removeEndingPoint(null)).toBe('')
+  })
+})
+
+describe('artistLine', () => {
+  const life = {
+    artist_birthdate: '1660', artist_birthplace: 'Chemnitz', artist_deathdate: '1736', artist_deathplace: 'Augsburg',
+  }
+
+  it('brackets the life data on the artist line, as database_item.php did', () => {
+    expect(artistLine('Andreas Matthäus', life)).toBe('Andreas Matthäus (1660, Chemnitz-1736, Augsburg)')
+    expect(artistLine('A', { artist_birthdate: '1660', artist_deathdate: '1736' })).toBe('A (1660-1736)')
+    // Legacy's own joins: a missing birth date keeps the comma before the place.
+    expect(artistLine('A', { artist_birthplace: 'Chemnitz' })).toBe('A (, Chemnitz)')
+  })
+
+  it('prints nothing bracketed without an artist, and the artist alone without life data', () => {
+    expect(artistLine('', life)).toBe('')
+    expect(artistLine('A', {})).toBe('A')
+    expect(artistLine('A', undefined)).toBe('A')
+  })
+
+  it('puts the life data on a line of its own, as the DXA sheets did', () => {
+    expect(artistLine('A', life, { style: 'line' })).toBe('A  \n1660, Chemnitz - 1736, Augsburg')
+    expect(artistLine('A', { artist_deathplace: 'Augsburg' }, { style: 'line' })).toBe('A  \nAugsburg')
+    expect(artistLine('', { artist_birthdate: '1660' }, { style: 'line' })).toBe('1660')
+    expect(artistLine('A', { artist_birthdate: ' ' }, { style: 'line' })).toBe('A')
+  })
+
+  it('renders the line break as one through the sheet engine', () => {
+    const [row] = sheetRows([{ key: 'artist', value: (c) => artistLine('A', c.text, { style: 'line' }) }], { text: life })
+    expect(row.html).toBe('A<br>1660, Chemnitz - 1736, Augsburg')
   })
 })
