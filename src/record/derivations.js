@@ -162,10 +162,21 @@ export function timelineLinkFor(record, { name = 'timeline-results', keys = {}, 
  * `text` without the period(s) that end it, as legacy's `removeEndingPoint`
  * printed most sheet values — sparing a period after "C", as in "B.C.".
  * Anything but a string comes back as ''.
+ *
+ * Legacy's `preg_replace("/([^C])\.+[[:space:]]*$/", "\\1", …)`, read as a
+ * scan from the end rather than as that regex, which backtracks
+ * polynomially on a long run of periods. Same answers: the final run of
+ * periods goes with the whitespace after it; after a "C", or at the very
+ * start, the run's first period stays.
  */
 export function removeEndingPoint(text) {
   if (typeof text !== 'string') return ''
-  return text.replace(/([^C])\.+\s*$/, '$1')
+  const body = text.trimEnd()
+  let start = body.length
+  while (start > 0 && body[start - 1] === '.') start--
+  if (start === body.length) return text
+  if (start === 0 || body[start - 1] === 'C') return body.length - start > 1 ? body.slice(0, start + 1) : text
+  return body.slice(0, start)
 }
 
 const lifePart = (value) => (typeof value === 'string' ? value.trim() : '')

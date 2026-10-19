@@ -113,6 +113,20 @@ describe('removeEndingPoint', () => {
     expect(removeEndingPoint('No period')).toBe('No period')
     expect(removeEndingPoint(null)).toBe('')
   })
+
+  it("answers as legacy's regex did at the edges", () => {
+    // What /([^C])\.+[[:space:]]*$/ → "$1" gives in PHP.
+    expect(removeEndingPoint('B.C..')).toBe('B.C.')
+    expect(removeEndingPoint('...')).toBe('.')
+    expect(removeEndingPoint('.')).toBe('.')
+    expect(removeEndingPoint('Ottoman.\n')).toBe('Ottoman')
+    expect(removeEndingPoint('No period ')).toBe('No period ')
+  })
+
+  it('stays linear on a long run of periods', () => {
+    const text = `B${'.'.repeat(100000)}x`
+    expect(removeEndingPoint(text)).toBe(text)
+  })
 })
 
 describe('artistLine', () => {
