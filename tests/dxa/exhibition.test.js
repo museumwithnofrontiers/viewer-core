@@ -213,6 +213,15 @@ describe('useExhibitionSheet', () => {
     expect(museumField.value({ record: orphan, text: {} })).toBe('')
   })
 
+  it("prints legacy's free-text Period / Dynasty line, and the artist's life data under the artist", () => {
+    const field = (key) => sheet.itemSheet.fields.find((f) => f.key === key)
+    const record = { ...items.value[0], artist_names: ['A. Potter'] }
+    const text = { dynasty: 'Mamluk period', artist_birthdate: '1520', artist_deathplace: 'Cairo' }
+    expect(field('dynasty').value({ record, language: 'en', text })).toBe('Mamluk period')
+    expect(field('dynasty').value({ record, language: 'en', text: {} })).toBe('')
+    expect(field('artist').value({ record, text })).toBe('A. Potter  \n1520 - Cairo')
+  })
+
   it('the citation carries a project line, unlike the gallery shape', () => {
     expect(sheet.itemSheet.citation.project(items.value[0], { language: 'en' })).toBe('The Use of Colours in Art')
     expect(sheet.itemSheet.citation.permalink).toBe(false)

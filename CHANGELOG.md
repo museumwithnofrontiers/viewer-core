@@ -1,3 +1,27 @@
+## 2.6.0 (2026-10-19)
+
+Part of the legacy-parity story museumwithnofrontiers/inventory-app#2233 (C1,
+C10, decision D5). Shows two fields the data packages carry from
+museumwithnofrontiers/inventory-app#2232 and #2234 on; a package built before
+them carries neither, and every sheet reads as it did.
+
+### Added
+
+- `artistLine(artist, text, { style })`: the artist line with the artist's
+  life data (`artist_birthdate`, `artist_birthplace`, `artist_deathdate`,
+  `artist_deathplace`), in legacy's two shapes — `'bracketed'` (Baroque Art
+  and Sharing History, `Name (1660, Chemnitz-1736, Augsburg)`) and `'line'`
+  (the galleries and exhibitions, on a line under the artist).
+- `removeEndingPoint(text)`: legacy's own trim of the periods ending a sheet
+  value.
+
+### Changed (`/dxa`)
+
+- The gallery and exhibition item sheets print the artist's life data under
+  the artist, as legacy's `DatabaseItem.vue` did.
+- Their Period / Dynasty row prints legacy's free-text line (`dynasty`); the
+  record's linked dynasties stand in when it has none, and keep their popouts.
+
 ## 2.5.2 (2026-09-30)
 
 Fixes museumwithnofrontiers/viewer-core#123, found in M11

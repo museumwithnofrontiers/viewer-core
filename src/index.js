@@ -39,7 +39,8 @@ export {
   glossaryEntries, glossaryTermsFor, glossaryTermsForText, sheetRows, useRecordSheet,
 } from './record/recordSheet.js'
 export {
-  citation, relatedRecords, searchGlossary, timelineLinkFor, useGlossaryPopup, useRelatedRecords,
+  artistLine, citation, relatedRecords, removeEndingPoint, searchGlossary, timelineLinkFor, useGlossaryPopup,
+  useRelatedRecords,
 } from './record/derivations.js'
 export { buildCollectionTree, collectionTreeFromThemes, useCollectionTree } from './record/collectionTree.js'
 export { groupByCountry, partnerHierarchy, partnerView } from './record/partners.js'
