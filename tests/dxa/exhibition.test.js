@@ -220,6 +220,7 @@ describe('useExhibitionSheet', () => {
     expect(field('dynasty').value({ record, language: 'en', text })).toBe('Mamluk period')
     expect(field('dynasty').value({ record, language: 'en', text: {} })).toBe('')
     expect(field('artist').value({ record, text })).toBe('A. Potter  \n1520 - Cairo')
+    expect(field('artist').value({ record, text: { ...text, artist: 'Inconnu' } })).toBe('Inconnu  \n1520 - Cairo')
   })
 
   it('the citation carries a project line, unlike the gallery shape', () => {

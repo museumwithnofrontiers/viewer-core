@@ -221,6 +221,13 @@ describe('useGallerySheet', () => {
     expect(artistField.value({ record: items.value[1], text: {} })).toBe('')
   })
 
+  it("names a Sharing History record's artist in the page's language, with the life data", () => {
+    const artistField = sheet.itemSheet.fields.find((f) => f.key === 'artist')
+    const record = { ...items.value[1], artist_names: ['Unknown'] }
+    expect(artistField.value({ record, text: { artist: 'Inconnu', artist_birthdate: '1850' } })).toBe('Inconnu  \n1850')
+    expect(artistField.value({ record, text: {} })).toBe('Unknown')
+  })
+
   it('citation has no permalink and no per-project line, unlike the exhibition shape', () => {
     expect(sheet.itemSheet.citation).toEqual({ permalink: false, heading: 'record.citation.ofThisPage' })
     expect(sheet.itemSheet.citation.project).toBeUndefined()

@@ -27,7 +27,7 @@
 // dynasties stand in when it has none, and keep their own popouts
 // (decision D5, inventory-app#2233).
 
-import { artistLine } from '../../record/derivations.js'
+import { artistLine, recordArtist } from '../../record/derivations.js'
 
 /**
  * The exhibition's item-sheet spec, over its data layer's `data`.
@@ -61,7 +61,7 @@ export function useExhibitionSheet(data, config = {}) {
     { key: 'originalOwner', label: 'sheet.field.originalOwner', value: 'initial_owner' },
     { key: 'currentOwner', label: 'sheet.field.currentOwner', value: 'owner' },
     { key: 'date', label: 'sheet.field.date', value: 'dates' },
-    { key: 'artist', label: 'sheet.field.artists', value: (c) => artistLine((c.record.artist_names ?? []).join(', '), c.text, { style: 'line' }) },
+    { key: 'artist', label: 'sheet.field.artists', value: (c) => artistLine(recordArtist(c.record, c.text), c.text, { style: 'line' }) },
     { key: 'scribe', label: 'sheet.field.scribe', value: 'scriber' },
     { key: 'workshop', label: 'sheet.field.workshop', value: 'workshop' },
     { key: 'type', label: 'sheet.field.type', value: 'type' },

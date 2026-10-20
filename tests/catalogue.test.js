@@ -85,6 +85,12 @@ describe('objectsAndMonumentsSummary', () => {
 })
 
 describe('the field search', () => {
+  it("finds a Sharing History record by its artist in the page's language", () => {
+    const values = searchFields().artist({ artist_names: ['Unknown'] }, { artist: 'Inconnu' })
+    expect(values).toContain('Inconnu')
+    expect(values).toContain('Unknown')
+  })
+
   it('has the dynasty field only when a label is given', () => {
     expect(Object.keys(searchFields())).not.toContain('dynasty')
     expect(Object.keys(searchFields({ dynastyLabel: (id) => id }))).toContain('dynasty')

@@ -1,3 +1,22 @@
+## 2.7.0 (2026-10-20)
+
+Part of the legacy-parity story museumwithnofrontiers/inventory-app#2233
+(C22). A Sharing History record has no artist entity, and legacy wrote its
+artist per language ("Unknown", "Inconnu"); from
+museumwithnofrontiers/inventory-app#2240 on, the gallery and exhibition
+packages carry it on each translation as `artist`. A package without it reads
+as before.
+
+### Added
+
+- `recordArtist(record, text)`: the artist a sheet names, the translation's
+  own `artist` when it has one, else the record's `artist_names`.
+
+### Changed (`/dxa`)
+
+- The gallery and exhibition item sheets, and the exhibition theme pictures,
+  name the artist through `recordArtist`.
+- The artist field search also matches the translation's `artist`.
 ## 2.6.0 (2026-10-19)
 
 Part of the legacy-parity story museumwithnofrontiers/inventory-app#2233 (C1,
