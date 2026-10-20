@@ -1,7 +1,7 @@
 import { beforeAll, describe, expect, it } from 'vitest'
 import { ref } from 'vue'
 import {
-  artistLine, citation, loadEntities, relatedRecords, removeEndingPoint, searchGlossary, sheetRows, timelineLinkFor,
+  artistLine, citation, loadEntities, recordArtist, relatedRecords, removeEndingPoint, searchGlossary, sheetRows, timelineLinkFor,
   useDataPackage, useGlossaryPopup, useRelatedRecords,
 } from '../src/index.js'
 
@@ -126,6 +126,19 @@ describe('removeEndingPoint', () => {
   it('stays linear on a long run of periods', () => {
     const text = `B${'.'.repeat(100000)}x`
     expect(removeEndingPoint(text)).toBe(text)
+  })
+})
+
+describe('recordArtist', () => {
+  it("names the translation's own artist, as a Sharing History record writes it per language", () => {
+    expect(recordArtist({ artist_names: ['Unknown'] }, { artist: 'Inconnu' })).toBe('Inconnu')
+  })
+
+  it('falls back to the record artists, joined', () => {
+    expect(recordArtist({ artist_names: ['A', 'B'] }, {})).toBe('A, B')
+    expect(recordArtist({ artist_names: ['A'] }, { artist: ' ' })).toBe('A')
+    expect(recordArtist({}, undefined)).toBe('')
+    expect(recordArtist(undefined, undefined)).toBe('')
   })
 })
 

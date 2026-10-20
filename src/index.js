@@ -39,7 +39,7 @@ export {
   glossaryEntries, glossaryTermsFor, glossaryTermsForText, sheetRows, useRecordSheet,
 } from './record/recordSheet.js'
 export {
-  artistLine, citation, relatedRecords, removeEndingPoint, searchGlossary, timelineLinkFor, useGlossaryPopup,
+  artistLine, citation, recordArtist, relatedRecords, removeEndingPoint, searchGlossary, timelineLinkFor, useGlossaryPopup,
   useRelatedRecords,
 } from './record/derivations.js'
 export { buildCollectionTree, collectionTreeFromThemes, useCollectionTree } from './record/collectionTree.js'

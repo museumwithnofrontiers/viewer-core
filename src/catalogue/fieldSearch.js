@@ -28,7 +28,7 @@ export function searchFields({ dynastyLabel } = {}) {
     location: (item, text) => [text.location, item.country_id],
     provenance: (item, text) => text.provenance,
     patron: (item, text) => text.patrons ?? text.initial_owner,
-    artist: (item, text) => [...(item.artist_names ?? []), text.architects],
+    artist: (item, text) => [...(item.artist_names ?? []), text.artist, text.architects],
     material: (item, text) => text.type,
     // The catch-all across the descriptive fields the others leave out.
     other: (item, text) => [

@@ -2,6 +2,7 @@ import { computed } from 'vue'
 import { useI18n } from '../../i18n/index.js'
 import { entityRef } from '../../composables/useEntities.js'
 import { useCollectionTree } from '../../record/collectionTree.js'
+import { recordArtist } from '../../record/derivations.js'
 
 // An exhibition's themes: the tour its theme pages, its themes list and its
 // theme galleries read (inventory-app#2053). The six exhibitions each carried
@@ -240,7 +241,8 @@ export function useExhibitionThemes(data) {
       if (sheet.alternate_name) {
         fields.push({ label: `${t('sheet.field.alsoKnownAs')}:`, value: mdInline(sheet.alternate_name) })
       }
-      if (parent.artist_names?.length) fields.push({ label: '', value: parent.artist_names.join(', ') })
+      const artist = recordArtist(parent, sheet)
+      if (artist) fields.push({ label: '', value: artist })
       if (sheet.dates) fields.push({ label: '', value: sheet.dates })
       return fields
     }
