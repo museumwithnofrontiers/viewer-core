@@ -1,3 +1,36 @@
+## 2.8.0 (2026-10-21)
+
+Part of the legacy-parity story museumwithnofrontiers/inventory-app#2233. Rule
+of 2026-10-21: the import keeps all data, and a site displays a value only
+where legacy displayed it, never more. Legacy showed a picture's caption and
+credits, a dynasty's name, a glossary term and a related record's
+justification in the page's language only, and nothing where that language had
+none. The sheets now do the same. Legacy's own fallbacks stay: a record with
+no row in the page's language reads in English, and a related record's name
+falls back to the main language.
+
+### Added
+
+- `pictureCredits(picture, language)`: a picture's photographer and copyright
+  in `language`, from the per-language `photographers` / `copyrights` maps the
+  packages carry from museumwithnofrontiers/inventory-app#2294 on; a package
+  exported before them reads its flat fields, as before.
+
+### Changed
+
+- `glossaryTermsFor`, `glossaryTermsForText` and `searchGlossary` offer only
+  the terms that have a row in the language asked, never one through English.
+- `relatedRecords`: the justification in the language asked only.
+
+### Changed (`/dxa`)
+
+- The gallery and exhibition item sheets: captions and picture credits in the
+  sheet's language only; linked dynasty names (field and popout) in it only;
+  no credits read from another language (`attribution` dropped); a related
+  record's name in the sheet's language when it has one.
+- The exhibition partner pictures: captions and credits in the page's language
+  only.
+
 ## 2.7.0 (2026-10-20)
 
 Part of the legacy-parity story museumwithnofrontiers/inventory-app#2233

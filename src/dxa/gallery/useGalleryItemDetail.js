@@ -25,13 +25,13 @@ import { useGallerySheet } from './useGallerySheet.js'
  * The gallery's item-page spec, over its data layer's `data` and its
  * timeline layer's `timeline` (`useGalleryTimeline`).
  *
- * Reads `data.defaultLang`, `data.dynastyById`, `data.labelOf`,
+ * Reads `data.dynastyById`, `data.labelOf`,
  * `data.partnerById`, `data.partnerRoute`, `data.translations`, what
  * `useGallerySheet` reads, and `timeline.countryIdForCode`,
  * `timeline.timelineEvents` (`countries`, `findEvents`).
  */
 export function useGalleryItemDetail(data, timeline) {
-  const { defaultLang, dynastyById, labelOf, partnerById, partnerRoute, translations } = data
+  const { dynastyById, labelOf, partnerById, partnerRoute, translations } = data
   const { countryIdForCode, timelineEvents } = timeline
   const { countries: timelineCountries, findEvents } = timelineEvents
   const { itemSheet: platformSheet } = useGallerySheet(data)
@@ -43,8 +43,9 @@ export function useGalleryItemDetail(data, timeline) {
     return partner ? partnerRoute(partner) : null
   }
 
+  // The sheet language's own: dxa-api returned a dynasty only in it.
   function dynastyTranslation(dynasty, language) {
-    return translations('dynasties', language)[dynasty.id] ?? translations('dynasties', defaultLang)[dynasty.id] ?? {}
+    return translations('dynasties', language)[dynasty.id] ?? {}
   }
 
   // Legacy popped out a dynasty only when it had a history to show.

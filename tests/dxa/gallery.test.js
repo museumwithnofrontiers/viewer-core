@@ -206,6 +206,33 @@ describe('useGallerySheet', () => {
     expect(dynastyField.value(ctx)).toBe('Fatimid dynasty')
   })
 
+  it('shows no linked dynasty name in a language the dynasty has none in, as dxa-api did', () => {
+    const dynastyField = sheet.itemSheet.fields.find((f) => f.key === 'dynasty')
+    expect(dynastyField.value({ record: items.value[0], language: 'fr', text: {} })).toBe('')
+  })
+
+  it("shows a picture's caption and credits in the sheet's language only", () => {
+    const record = {
+      ...items.value[0],
+      images: [{
+        url: 'u', display_order: 1,
+        captions: { el: 'Λεζάντα' }, photographers: { el: 'Φωτογράφος' }, copyrights: { el: 'Μουσείο Μπενάκη' },
+        photographer: 'Φωτογράφος', copyright: 'Μουσείο Μπενάκη',
+      }],
+    }
+    expect(sheet.itemSheet.media(record, { language: 'en' })[0]).toMatchObject({ caption: '', photographer: '', copyright: '' })
+    expect(sheet.itemSheet.media(record, { language: 'el' })[0]).toMatchObject({ caption: 'Λεζάντα', photographer: 'Φωτογράφος', copyright: 'Μουσείο Μπενάκη' })
+  })
+
+  it('reads the flat picture credits of a package exported before the per-language maps', () => {
+    const record = { ...items.value[0], images: [{ url: 'u', display_order: 1, captions: {}, photographer: 'P', copyright: 'C' }] }
+    expect(sheet.itemSheet.media(record, { language: 'fr' })[0]).toMatchObject({ photographer: 'P', copyright: 'C' })
+  })
+
+  it('reads no credits across languages', () => {
+    expect(sheet.itemSheet.attribution).toBeUndefined()
+  })
+
   it("prints legacy's free-text Period / Dynasty line over the linked names", () => {
     const dynastyField = sheet.itemSheet.fields.find((f) => f.key === 'dynasty')
     const ctx = { record: items.value[0], language: 'en', text: { dynasty: 'Fatimid period, 10th century' } }

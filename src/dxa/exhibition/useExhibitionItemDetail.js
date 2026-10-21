@@ -22,7 +22,7 @@ import { useExhibitionSheet } from './useExhibitionSheet.js'
  * The exhibition's item-page spec, over its data layer's `data` and its
  * timeline layer's `timeline` (`useExhibitionTimeline`).
  *
- * Reads `data.defaultLang`, `data.dynastyById`, `data.isExploreRecord`,
+ * Reads `data.dynastyById`, `data.isExploreRecord`,
  * `data.isHiddenPartner`, `data.labelOf`, `data.partnerById`,
  * `data.partnerRoute`, `data.translations`, what `useExhibitionSheet` reads,
  * and `timeline.countryIdForCode`, `timeline.hasTimeline`,
@@ -30,7 +30,7 @@ import { useExhibitionSheet } from './useExhibitionSheet.js'
  */
 export function useExhibitionItemDetail(data, timeline) {
   const {
-    defaultLang, dynastyById, isExploreRecord, isHiddenPartner, labelOf, partnerById, partnerRoute, translations,
+    dynastyById, isExploreRecord, isHiddenPartner, labelOf, partnerById, partnerRoute, translations,
   } = data
   const { countryIdForCode, hasTimeline, timelineEvents, timelineSpec } = timeline
   const { countries: timelineCountries, findEvents } = timelineEvents
@@ -41,7 +41,7 @@ export function useExhibitionItemDetail(data, timeline) {
   }
 
   function dynastyTr(dynasty, language) {
-    return translations('dynasties', language)[dynasty.id] ?? translations('dynasties', defaultLang)[dynasty.id] ?? {}
+    return translations('dynasties', language)[dynasty.id] ?? {}
   }
 
   // Legacy popped out a dynasty only when it had a history to show.
