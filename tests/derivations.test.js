@@ -35,8 +35,8 @@ describe('searchGlossary', () => {
   it('finds the terms whose spelling starts with the input, in the language asked', () => {
     expect(searchGlossary('kuf', 'en').map((h) => h.spelling)).toEqual(['kufic'])
     expect(searchGlossary('cou', 'fr').map((h) => h.id)).toEqual(['g1'])
-    // g2 has no French row and is found through its English spellings.
-    expect(searchGlossary('gla', 'fr').map((h) => h.id)).toEqual(['g2'])
+    // g2 has no French row: legacy's French glossary did not have it either.
+    expect(searchGlossary('gla', 'fr')).toEqual([])
     expect(searchGlossary('', 'en')).toEqual([])
   })
 })
@@ -66,7 +66,8 @@ describe('relatedRecords', () => {
     expect(inPackage[0].record.internal_name).toBe('Lamp')
     expect(inPackage[0].justification).toBe('Même atelier')
     expect(outside.map((r) => r.id)).toEqual(['x9'])
-    expect(relatedRecords(o1, { entity: 'objects', language: 'de' }).inPackage[0].justification).toBe('Same workshop')
+    // No German justification: legacy printed none, never the English one.
+    expect(relatedRecords(o1, { entity: 'objects', language: 'de' }).inPackage[0].justification).toBe('')
   })
 
   it('treats a reference the package does not hold as outside, whatever it claims', () => {

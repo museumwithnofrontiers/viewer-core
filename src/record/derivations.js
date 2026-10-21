@@ -43,8 +43,9 @@ export function useGlossaryPopup(entries) {
 }
 
 /**
- * The glossary terms whose spelling starts with `input`, in `language`
- * (falling back to English), for a glossary search box: `[{ id, word,
+ * The glossary terms whose spelling starts with `input`, among those that have
+ * a row in `language` (legacy searched that language's glossary only), for a
+ * glossary search box: `[{ id, word,
  * spelling, definition }]`, one per term, sorted by spelling.
  */
 export function searchGlossary(input, language, { entity = 'glossary' } = {}) {
@@ -52,10 +53,10 @@ export function searchGlossary(input, language, { entity = 'glossary' } = {}) {
   if (!needle) return []
   const { translations } = useDataPackage()
   const rows = translations(entity, language)
-  const fallback = translations(entity, BASE_LANGUAGE)
   const out = []
   for (const term of entityRef(entity).value ?? []) {
-    const t = rows[term.id] ?? fallback[term.id] ?? {}
+    const t = rows[term.id]
+    if (!t) continue
     const spellings = t.spellings?.length ? t.spellings : [term.word]
     for (const spelling of spellings) {
       if (String(spelling ?? '').toLowerCase().startsWith(needle)) {
@@ -95,7 +96,7 @@ export function citation({ author, name, project, publisher = 'Museum With No Fr
 /**
  * A record's `related_items`, split by whether the package carries them:
  * `inPackage` is `[{ reference, record, justification }]` with the
- * justification in `language` (falling back to English); `outside` is the
+ * justification in `language` only, as legacy printed it; `outside` is the
  * references the package does not hold, kept as the references they are — a
  * link is never dropped for being unresolvable, and never invented either.
  */
@@ -116,7 +117,7 @@ export function relatedRecords(record, { entity = 'items', language = BASE_LANGU
     inPackage.push({
       reference,
       record: found,
-      justification: justifications[language] ?? justifications[BASE_LANGUAGE] ?? '',
+      justification: justifications[language] ?? '',
     })
   }
   return { inPackage, outside }
@@ -177,6 +178,19 @@ export function removeEndingPoint(text) {
   if (start === body.length) return text
   if (start === 0 || body[start - 1] === 'C') return body.length - start > 1 ? body.slice(0, start + 1) : text
   return body.slice(0, start)
+}
+
+/**
+ * A picture's photographer and copyright in `language`. Legacy kept them per
+ * language, like the caption, and printed only the page language's. A package
+ * exported before the per-language `photographers` and `copyrights` maps
+ * existed has only the flat fields, which it reads instead.
+ */
+export function pictureCredits(picture, language) {
+  if (picture?.photographers || picture?.copyrights) {
+    return { photographer: picture.photographers?.[language] ?? '', copyright: picture.copyrights?.[language] ?? '' }
+  }
+  return { photographer: picture?.photographer ?? '', copyright: picture?.copyright ?? '' }
 }
 
 const lifePart = (value) => (typeof value === 'string' ? value.trim() : '')

@@ -27,7 +27,7 @@
 // dynasties stand in when it has none, and keep their own popouts
 // (decision D5, inventory-app#2233).
 
-import { artistLine, recordArtist } from '../../record/derivations.js'
+import { artistLine, pictureCredits, recordArtist } from '../../record/derivations.js'
 
 /**
  * The exhibition's item-sheet spec, over its data layer's `data`.
@@ -44,7 +44,7 @@ export function useExhibitionSheet(data, config = {}) {
 
   const dynastyNames = (c) =>
     (c.record.dynasty_ids ?? [])
-      .map((id) => translations('dynasties', c.language)[id]?.name ?? translations('dynasties', defaultLang)[id]?.name ?? '')
+      .map((id) => translations('dynasties', c.language)[id]?.name ?? '')
       .filter(Boolean)
       .join(', ')
 
@@ -87,13 +87,8 @@ export function useExhibitionSheet(data, config = {}) {
   const itemSheet = {
     entity: 'items',
     translations: ['glossary', 'dynasties', 'partners'],
-    // Attribution names are language-independent, but the importer files
-    // `author` / `copy_editor` for EPM records on the Arabic row only (a
-    // known gap, recorded in the exporter's README). Legacy printed them on
-    // every sheet, so the platform reads them off another row when the
-    // active one has neither — the one place a page reads across
-    // languages, and only for proper names.
-    attribution: ['author', 'copy_editor'],
+    // Credits are the sheet language's own: dxa-api read them from that
+    // language's authors_objects rows and printed nothing when it had none.
     fields,
     layout: 'list',
     shortDescription: 'short_description',
@@ -104,9 +99,8 @@ export function useExhibitionSheet(data, config = {}) {
         .map((p) => ({
           url: p.url,
           alt: labelOf('items', record.id),
-          caption: p.captions?.[language] ?? p.captions?.[defaultLang] ?? '',
-          photographer: p.photographer ?? '',
-          copyright: p.copyright ?? '',
+          caption: p.captions?.[language] ?? '',
+          ...pictureCredits(p, language),
         })),
     citation: {
       permalink: false,
@@ -121,11 +115,13 @@ export function useExhibitionSheet(data, config = {}) {
       variant: 'grid',
       heading: 'exhibition.related.objects',
       actionLabel: 'catalogue.results.seeDatabaseEntry',
-      record: ({ record: other, justification }) => ({
+      // In the sheet's language when the related record has it, in the main
+      // language otherwise, as legacy's relatedObjectsMainLanguage did.
+      record: ({ record: other, justification }, { language = defaultLang } = {}) => ({
         id: other.id,
         image: other.images?.[0]?.url ?? '',
         imageAlt: labelOf('items', other.id),
-        name: mdInline(tr('items', other.id, defaultLang).name ?? other.internal_name ?? ''),
+        name: mdInline(translations('items', language)[other.id]?.name ?? tr('items', other.id, defaultLang).name ?? other.internal_name ?? ''),
         meta: [labelOf('countries', other.country_id), justification ? mdStrip(justification) : ''].filter(Boolean),
         to: itemRoute(other),
       }),

@@ -36,14 +36,15 @@ describe('useRecordSheet', () => {
     expect(sheet.glossary.value.map((e) => e.spelling)).toEqual(['coufique', 'écriture coufique'])
   })
 
-  it('falls back to English for the text and the glossary, and follows the toggle', async () => {
+  it('falls back to English for the text, not for the glossary, and follows the toggle', async () => {
     const record = ref(object('o3', ['en', 'fr']))
     const sheet = mountSheet(record, { entity: 'objects', translations: ['glossary'] })
     await settle(sheet.ready)
-    // o3 has no French row: its text is the English one; g2 has no French spellings either.
+    // o3 has no French row: its text is the English one, as legacy's PHP sheet
+    // read it. g2 has no French row, and legacy linked no term through another
+    // language.
     expect(sheet.text.value.name).toBe('Fragment')
-    expect(sheet.terms.value.map((t) => t.id)).toEqual(['g1', 'g2'])
-    expect(sheet.terms.value[1].spellings).toEqual(['glaze', 'glazed'])
+    expect(sheet.terms.value.map((t) => t.id)).toEqual(['g1'])
     sheet.select('en')
     await settle(sheet.ready)
     expect(sheet.language.value).toBe('en')
@@ -92,10 +93,10 @@ describe('glossaryTermsForText', () => {
     expect(terms.find((t) => t.id === 'g1').spellings).toEqual(['kufic', 'kufic script'])
   })
 
-  it('falls back to a term’s English spellings when it has no row in the language asked', () => {
-    // g2 has no French row; its English spelling "glaze" still matches.
+  it('finds no term through another language when it has no row in the language asked', () => {
+    // g2 has no French row, so its English spelling "glaze" is not a French term.
     const terms = glossaryTermsForText('Un bol en glaze, coufique.', 'fr')
-    expect(terms.map((t) => t.id).sort()).toEqual(['g1', 'g2'])
+    expect(terms.map((t) => t.id).sort()).toEqual(['g1'])
     expect(terms.find((t) => t.id === 'g1').spellings).toEqual(['coufique', 'écriture coufique'])
   })
 

@@ -1,3 +1,5 @@
+import { pictureCredits } from '../../record/derivations.js'
+
 // The partner list and profile, as specs. The grouping, the A–Z toggle, the
 // tab strip's mechanics, the language switch and the media gallery are the
 // platform's (`PartnerListView`/`RecordView`); what stays here is an
@@ -11,12 +13,12 @@
 /**
  * The exhibition's partner specs, over its data layer's `data`.
  *
- * Reads `data.defaultLang`, `data.isHiddenPartner`, `data.labelOf`,
+ * Reads `data.isHiddenPartner`, `data.labelOf`,
  * `data.partnerRoute`. `config` carries nothing today.
  */
 export function useExhibitionPartner(data, config = {}) {
   void config
-  const { defaultLang, isHiddenPartner, labelOf, partnerRoute } = data
+  const { isHiddenPartner, labelOf, partnerRoute } = data
 
   // ── The list (Partners.vue) ─────────────────────────────────────────
   //
@@ -52,9 +54,8 @@ export function useExhibitionPartner(data, config = {}) {
         .map((p) => ({
           url: p.url,
           alt: labelOf('partners', record.id),
-          caption: p.captions?.[language] ?? p.captions?.[defaultLang] ?? '',
-          photographer: p.photographer ?? '',
-          copyright: p.copyright ?? '',
+          caption: p.captions?.[language] ?? '',
+          ...pictureCredits(p, language),
         })),
   }
 

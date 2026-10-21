@@ -14,15 +14,15 @@ const BASE_LANGUAGE = 'en'
 // Seven pages wrote that choreography by hand. This is the one place it is
 // written, on top of `useRecordLanguage`, which decides the language.
 
-// A term's row in one language: its spellings and definition from
-// `rows`/`fallback` (English), its headword from `term` (the glossary
-// record itself, language-independent) — `null` when the term has neither,
-// which happens for a headword-only fixture row with no translation file at
-// all. Shared by `glossaryTermsFor` (walks a record's own `glossary_ids`)
+// A term's row in one language: its spellings and definition from `rows`,
+// its headword from `term` (the glossary record itself, language-independent)
+// — `null` when the term has no row in that language. Legacy linked a term
+// only in a language its glossary had it in, never through another. Shared by `glossaryTermsFor` (walks a record's own `glossary_ids`)
 // and `glossaryTermsForText` (walks the whole glossary, filtered by what
 // the text contains), so the two agree on what a term row looks like.
-function termRow(id, term, rows, fallback) {
-  const t = rows[id] ?? fallback[id] ?? {}
+function termRow(id, term, rows) {
+  const t = rows[id]
+  if (!t) return null
   const spellings = (t.spellings ?? []).map((s) => String(s).trim()).filter(Boolean)
   const word = term?.word ?? spellings[0] ?? ''
   if (!word && spellings.length === 0) return null
@@ -31,17 +31,16 @@ function termRow(id, term, rows, fallback) {
 
 /**
  * `{ id, word, definition, spellings }` for each glossary term of `record`
- * (its `glossary_ids`), with the spellings and definition in `language`,
- * falling back to English, then to the term's own headword.
+ * (its `glossary_ids`) that has a row in `language`, with its spellings and
+ * definition in it, its headword standing in for a row without spellings.
  */
 export function glossaryTermsFor(record, language, { entity = 'glossary', translations, byId } = {}) {
   const ids = record?.glossary_ids ?? []
   if (ids.length === 0) return []
   const rows = translations(entity, language)
-  const fallback = translations(entity, BASE_LANGUAGE)
   const out = []
   for (const id of ids) {
-    const row = termRow(id, byId?.get(id), rows, fallback)
+    const row = termRow(id, byId?.get(id), rows)
     if (row) out.push(row)
   }
   return out
@@ -53,7 +52,7 @@ export function glossaryTermsFor(record, language, { entity = 'glossary', transl
  * spelling occurs in `text`, matched the same word-bounded way `md`/
  * `renderBlock` highlight it, so what this returns and what the text is
  * rendered with agree. The candidate list — the whole glossary in
- * `language`, English behind it — is the same for every text asked about
+ * `language` — is the same for every text asked about
  * in that language; `glossaryIdsIn` is what carries the caching (see
  * `markdown.js`), so building it here costs one pass over the glossary,
  * not a rebuilt regex.
@@ -63,11 +62,10 @@ export function glossaryTermsForText(text, language, { entity = 'glossary' } = {
   if (!value) return []
   const { translations } = useDataPackage()
   const rows = translations(entity, language)
-  const fallback = translations(entity, BASE_LANGUAGE)
   const byId = new Map()
   const candidates = []
   for (const term of entityRef(entity).value ?? []) {
-    const row = termRow(term.id, term, rows, fallback)
+    const row = termRow(term.id, term, rows)
     if (!row) continue
     byId.set(term.id, row)
     for (const spelling of row.spellings) candidates.push({ id: term.id, spelling })
@@ -98,9 +96,9 @@ export function glossaryEntries(terms) {
  *
  * `attribution: ['author', 'copy_editor']` names fields that are proper
  * names rather than text: when the active language's row lacks them, the
- * first other language of the record that has them supplies them. This is
- * the one place a page reads across languages, and it exists because the
- * importer files some records' credits on one language only.
+ * first other language of the record that has them supplies them. No
+ * platform sheet asks for it any more: legacy printed a language's own
+ * credits only, and nothing where it had none.
  */
 export function useRecordSheet(record, { entity, translations: related = [], attribution: attributionFields = [], languages } = {}) {
   if (!entity) throw new Error('useRecordSheet: entity is required')
@@ -143,8 +141,9 @@ export function useRecordSheet(record, { entity, translations: related = [], att
       return
     }
     // The record language and English both: `tr` falls back to English for a
-    // record or a term that has no row in the active language, and a fallback
-    // that has not been loaded is a blank, not a fallback.
+    // record that has no row in the active language, as legacy's PHP sheets
+    // did, and a fallback that has not been loaded is a blank, not a fallback.
+    // Glossary terms, dynasties and the rest stay in the active language.
     const languages = lang === BASE_LANGUAGE ? [lang] : [lang, BASE_LANGUAGE]
     await Promise.all(
       [entity, ...related].flatMap((name) => languages.map((code) => pkg.loadTranslations(name, code))),
