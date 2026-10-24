@@ -242,9 +242,9 @@ describe('useGallerySheet', () => {
 
   it("puts the artist's life data on a line under the artist, as DatabaseItem.vue did", () => {
     const artistField = sheet.itemSheet.fields.find((f) => f.key === 'artist')
-    const text = { artist_birthdate: '1520', artist_birthplace: 'Iznik', artist_deathdate: '1580' }
+    const text = { artist: 'A. Potter', artist_birthdate: '1520', artist_birthplace: 'Iznik', artist_deathdate: '1580' }
     expect(artistField.value({ record: items.value[0], text })).toBe('A. Potter  \n1520, Iznik - 1580')
-    expect(artistField.value({ record: items.value[0], text: {} })).toBe('A. Potter')
+    expect(artistField.value({ record: items.value[0], text: { artist: 'A. Potter' } })).toBe('A. Potter')
     expect(artistField.value({ record: items.value[1], text: {} })).toBe('')
   })
 
@@ -252,7 +252,7 @@ describe('useGallerySheet', () => {
     const artistField = sheet.itemSheet.fields.find((f) => f.key === 'artist')
     const record = { ...items.value[1], artist_names: ['Unknown'] }
     expect(artistField.value({ record, text: { artist: 'Inconnu', artist_birthdate: '1850' } })).toBe('Inconnu  \n1850')
-    expect(artistField.value({ record, text: {} })).toBe('Unknown')
+    expect(artistField.value({ record, text: {} })).toBe('')
   })
 
   it('citation has no permalink and no per-project line, unlike the exhibition shape', () => {
