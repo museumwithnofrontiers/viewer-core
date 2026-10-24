@@ -135,9 +135,9 @@ describe('recordArtist', () => {
     expect(recordArtist({ artist_names: ['Unknown'] }, { artist: 'Inconnu' })).toBe('Inconnu')
   })
 
-  it('falls back to the record artists, joined', () => {
-    expect(recordArtist({ artist_names: ['A', 'B'] }, {})).toBe('A, B')
-    expect(recordArtist({ artist_names: ['A'] }, { artist: ' ' })).toBe('A')
+  it("names nothing when the language has no artist line, as legacy printed nothing", () => {
+    expect(recordArtist({ artist_names: ['A', 'B'] }, {})).toBe('')
+    expect(recordArtist({ artist_names: ['A'] }, { artist: ' ' })).toBe('')
     expect(recordArtist({}, undefined)).toBe('')
     expect(recordArtist(undefined, undefined)).toBe('')
   })

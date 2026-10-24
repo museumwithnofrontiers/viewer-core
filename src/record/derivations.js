@@ -196,13 +196,16 @@ export function pictureCredits(picture, language) {
 const lifePart = (value) => (typeof value === 'string' ? value.trim() : '')
 
 /**
- * The artist the sheet names: the translation's own `artist` when it has one,
- * else the record's `artist_names`. A Sharing History record has no artist
- * entity, and legacy wrote its artist per language ("Unknown", "Inconnu"),
- * so the package carries it on each translation (inventory-app#2233, C22).
+ * The artist the sheet names: the translation's own `artist`. Legacy wrote the
+ * artist line per language ("Unknown", "Inconnu", or a sentence in Arabic) and
+ * printed a language's own line, or nothing when that language had none, so
+ * the package carries it on each translation (inventory-app#2233). The
+ * record's `artist_names` come from one language's line and stand for none;
+ * the record stays a parameter so callers need not change.
  */
+// eslint-disable-next-line no-unused-vars
 export function recordArtist(record, text) {
-  return lifePart(text?.artist) || (record?.artist_names ?? []).join(', ')
+  return lifePart(text?.artist)
 }
 
 /**
