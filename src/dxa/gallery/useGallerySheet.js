@@ -27,7 +27,7 @@
 // dynasties stand in when it has none, and keep their own popouts
 // (decision D5, inventory-app#2233).
 
-import { artistLine, pictureCredits, recordArtist } from '../../record/derivations.js'
+import { artistLine, pictureCredits, picturesInLanguage, recordArtist } from '../../record/derivations.js'
 
 /**
  * The gallery's item-sheet spec, over its data layer's `data`.
@@ -88,13 +88,17 @@ export function useGallerySheet(data, config = {}) {
     entity: 'items',
     translations: ['glossary', 'dynasties', 'partners'],
     // Credits are the sheet language's own: dxa-api read them from that
-    // language's authors_objects rows and printed nothing when it had none.
+    // language's authors_objects rows (else the record's own credit column)
+    // and printed nothing when it had neither. Each person is printed as its
+    // SQL did, "Firstname LASTNAME" (`credit_names`, `creditLine`).
+    creditNames: true,
     fields,
     layout: 'list',
     shortDescription: 'short_description',
     shortDescriptionAfter: 'description',
+    // Only the pictures with a row in the sheet's language, as dxa-api listed them.
     media: (record, { language }) =>
-      [...(record.images ?? [])]
+      [...picturesInLanguage(record.images, language)]
         .sort((a, b) => (a.display_order ?? 0) - (b.display_order ?? 0))
         .map((p) => ({
           url: p.url,

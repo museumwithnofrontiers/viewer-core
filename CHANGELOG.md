@@ -2,6 +2,21 @@
 
 Part of the legacy-parity check of 2026-10-25 (museumwithnofrontiers/inventory-app#2338).
 
+### Added
+
+- `creditLine(names)`: a credit line from a package's `credit_names[role]`,
+  each person as the galleries' sheet printed them, "Firstname LASTNAME", or
+  as written for a spelling of its own (`{ name }`).
+- `picturesInLanguage(pictures, language)`: the pictures with a row in the
+  page's language (a package's per-picture `languages`); every picture for a
+  package that carries none.
+
+### Changed (`/dxa`)
+
+- The gallery and exhibition item sheets list only the pictures with a row in
+  the sheet's language, and declare `creditNames: true`, so the layout prints
+  each credited person as dxa-api did.
+
 ### Changed
 
 - No text is code. The Markdown pipeline no longer reads code spans, indented
