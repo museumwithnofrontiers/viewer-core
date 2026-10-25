@@ -1,3 +1,39 @@
+## 2.10.0 (unreleased)
+
+Part of the legacy-parity check of 2026-10-25 (museumwithnofrontiers/inventory-app#2338).
+
+### Added
+
+- `creditLine(names)`: a credit line from a package's `credit_names[role]`,
+  each person as the galleries' sheet printed them, "Firstname LASTNAME", or
+  as written for a spelling of its own (`{ name }`).
+- `picturesInLanguage(pictures, language)`: the pictures with a row in the
+  page's language (a package's per-picture `languages`); every picture for a
+  package that carries none.
+
+### Changed (`/dxa`)
+
+- The gallery and exhibition item sheets list only the pictures with a row in
+  the sheet's language, and declare `creditNames: true`, so the layout prints
+  each credited person as dxa-api did.
+
+### Changed
+
+- No text is code. The Markdown pipeline no longer reads code spans, indented
+  code blocks or fenced code blocks: a backtick prints as the character it is,
+  and an indented line stays a line of its paragraph. Legacy wrote the ʿayn as
+  a backtick ("Fu\`ad", "\`Abbas"), and two of them in one text printed the
+  words between in a code font, with any markup inside as characters. A tag
+  between two backticks is now escaped like any other.
+
+## 2.9.0 (2026-10-25)
+
+### Changed
+
+- The artist line reads the translation's own `artist` only, in the page's
+  language (`recordArtist`); the record-level `artist_names` fallback is gone
+  (#129).
+
 ## 2.8.0 (2026-10-21)
 
 Part of the legacy-parity story museumwithnofrontiers/inventory-app#2233. Rule

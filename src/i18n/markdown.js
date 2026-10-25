@@ -30,6 +30,27 @@ const escaping = {
   },
 }
 
+// No text on these websites is code. Legacy wrote the backtick as a letter
+// (the ʿayn of "Fu`ad", "`Abbas"), and a text pasted from a word processor can
+// hold one anywhere; read as Markdown, two of them turned the words between
+// into a code span, printed in a code font with any markup inside as
+// characters. An indented line was a code block the same way. Without these
+// three tokenizers a backtick is the character it is, and an indented line a
+// line of its paragraph.
+const noCode = {
+  tokenizer: {
+    codespan() {
+      return undefined
+    },
+    code() {
+      return undefined
+    },
+    fences() {
+      return undefined
+    },
+  },
+}
+
 // `breaks` is the one difference, and it is a difference in the source rather
 // than in policy. A text in the dictionary is written as prose and wraps freely,
 // so a single newline means nothing. A record's field arrives from a database
@@ -37,8 +58,8 @@ const escaping = {
 // together.
 const prose = new Marked({ async: false, gfm: true, breaks: false })
 const record = new Marked({ async: false, gfm: true, breaks: true })
-prose.use(escaping)
-record.use(escaping)
+prose.use(escaping, noCode)
+record.use(escaping, noCode)
 
 const pipeline = (breaks) => (breaks ? record : prose)
 
@@ -123,8 +144,8 @@ function withGlossary(breaks, glossary) {
     } else {
       const withProse = new Marked({ async: false, gfm: true, breaks: false })
       const withRecord = new Marked({ async: false, gfm: true, breaks: true })
-      withProse.use(escaping, { extensions: [extension] })
-      withRecord.use(escaping, { extensions: [extension] })
+      withProse.use(escaping, noCode, { extensions: [extension] })
+      withRecord.use(escaping, noCode, { extensions: [extension] })
       entry = { prose: withProse, record: withRecord }
     }
     glossaryPipelines.set(key, entry)

@@ -193,6 +193,33 @@ export function pictureCredits(picture, language) {
   return { photographer: picture?.photographer ?? '', copyright: picture?.copyright ?? '' }
 }
 
+/**
+ * The pictures a page in `language` shows. Legacy listed a picture on a page
+ * only where it had a row in that language, empty or not; a package carries
+ * those languages per picture (`languages`). A package exported before them
+ * has no such list, and every picture shows, as before.
+ */
+export function picturesInLanguage(pictures, language) {
+  return (pictures ?? []).filter((picture) => !Array.isArray(picture?.languages) || picture.languages.includes(language))
+}
+
+/**
+ * A credit line from its people (`credit_names[role]` in a package): each one
+ * as the galleries' sheet printed them, "Firstname LASTNAME" (dxa-api's SQL
+ * capitalised the surname; the data keeps it as written), or as written when
+ * the entry is a spelling of its own (`{ name }`: the original script on an
+ * Arabic page, or the record's own credit column). Joined with ", ".
+ */
+export function creditLine(names) {
+  return (names ?? [])
+    .map((entry) => {
+      if (typeof entry?.name === 'string') return entry.name.trim()
+      return [entry?.firstname?.trim(), entry?.lastname?.trim()?.toLocaleUpperCase()].filter(Boolean).join(' ')
+    })
+    .filter(Boolean)
+    .join(', ')
+}
+
 const lifePart = (value) => (typeof value === 'string' ? value.trim() : '')
 
 /**
