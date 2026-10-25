@@ -28,6 +28,27 @@ describe('rendering a record field', () => {
     expect(renderPlain('An *italic* title.')).toBe('An italic title.')
     expect(renderPlain('An <i>italic</i> title.')).not.toContain('<i>')
   })
+
+  // Legacy writes the ʿayn as a backtick; no text on these sites is code.
+  it('prints backticks as the letters they are, never as a code span', () => {
+    const text = 'Khedive `Abbas Hilmi II, then King Fu`ad I.'
+    expect(renderInline(text)).toBe('Khedive `Abbas Hilmi II, then King Fu`ad I.')
+    expect(renderBlock(text, { breaks: true })).not.toContain('<code>')
+    expect(md('A `b` c', { glossary: [{ id: 'g1', spelling: 'c' }] })).not.toContain('<code>')
+    expect(renderInline('Fu\\`ad')).toBe('Fu`ad')
+    expect(renderPlain(text)).toBe(text)
+  })
+
+  it('still escapes a tag that sits between two backticks', () => {
+    const html = renderBlock('Muhammad V.<br/> However, `Abbas', { breaks: true })
+    expect(html).not.toContain('<code>')
+    expect(html).toContain('&lt;br/&gt;')
+  })
+
+  it('reads an indented line as a line of its paragraph, not a code block', () => {
+    expect(renderBlock('First line\n\n    indented line')).not.toContain('<pre>')
+    expect(renderBlock('```\nfenced\n```')).not.toContain('<pre>')
+  })
 })
 
 describe('renderPlain', () => {

@@ -158,10 +158,12 @@ describe('glossary highlighting', () => {
     expect(html).not.toContain('data-gid="g-kufic">')
   })
 
-  it('leaves a term alone inside a code span', () => {
+  // A backtick is a letter on these sites, never a code marker, so a term
+  // between two of them is a term like any other.
+  it('highlights a term between backticks, which are letters here', () => {
     const html = renderInline('See `mithqal` in the source.', { glossary })
-    expect(html).toContain('<code>mithqal</code>')
-    expect(html).not.toContain('gloss-term')
+    expect(html).not.toContain('<code>')
+    expect(html).toContain('`<span class="gloss-term" data-gid="g-mithqal">mithqal</span>`')
   })
 
   it('leaves a term alone inside a link destination', () => {
