@@ -15,4 +15,4 @@ permissions:
 
 jobs:
   publish:
-    uses: museumwithnofrontiers/viewer-workflows/.github/workflows/package-release.yml@v1.11.0
+    uses: museumwithnofrontiers/viewer-workflows/.github/workflows/package-release.yml@v1.12.0
