@@ -8,4 +8,4 @@ permissions:
 
 jobs:
   ci:
-    uses: museumwithnofrontiers/viewer-workflows/.github/workflows/package-ci.yml@v1.12.0
+    uses: museumwithnofrontiers/viewer-workflows/.github/workflows/package-ci.yml@v1.13.0
