@@ -1,6 +1,7 @@
-import { beforeAll, describe, expect, it } from 'vitest'
+import { afterEach, beforeAll, describe, expect, it } from 'vitest'
+import { ref } from 'vue'
 import {
-  CATALOGUE_DATE_MODE, CATALOGUE_PAGE_SIZE, loadEntities, objectsAndMonumentsSummary, searchFieldLabel, searchFieldOptions,
+  CATALOGUE_DATE_MODE, CATALOGUE_PAGE_SIZE, bindDisplayLanguage, loadEntities, objectsAndMonumentsSummary, useDataPackage, searchFieldLabel, searchFieldOptions,
   searchFields, searchRowKeys, searchRows, searchSummary, searchedFor, useCatalogue, useFieldSearch,
 } from '../src/index.js'
 
@@ -71,6 +72,44 @@ describe('useCatalogue', () => {
     expect(itemRow({ ...bowl, partner_id: 'not-in-package' }, ['holder']).meta).toEqual([])
     // An empty value is dropped, not printed.
     expect(itemRow(itemById.value.get('item-2'), ['country', 'dates']).meta).toEqual(['Syria'])
+  })
+})
+
+describe('the display language', () => {
+  afterEach(() => bindDisplayLanguage(null))
+
+  async function inFrench(options) {
+    bindDisplayLanguage(ref('fr'))
+    const catalogue = useCatalogue({ eager: ['items', 'countries', 'dynasties'], ...options })
+    await catalogue.loadEnglish()
+    const { loadTranslations } = useDataPackage()
+    await Promise.all([loadTranslations('items', 'fr'), loadTranslations('countries', 'fr')])
+    return catalogue
+  }
+
+  it('names reference data in the display language, falling back to English', async () => {
+    const { countryLabel } = await inFrench()
+    expect(countryLabel('c-eg')).toBe('Égypte')
+    expect(countryLabel('c-sy')).toBe('Syria')
+    // A label handed to `.map()` or a facet receives an index or a context, not a language.
+    expect(['c-eg'].map(countryLabel)).toEqual(['Égypte'])
+  })
+
+  it('shows each row in the display language when its record has it, its names in the same language', async () => {
+    const { itemRow, itemById, languageOf } = await inFrench()
+    expect(languageOf('items', 'item-2')).toBe('fr')
+    expect(itemRow(itemById.value.get('item-2'), ['location']).name).toBe('Lampe de mosquée')
+    expect(itemRow(itemById.value.get('item-2'), ['location']).meta).toEqual(['Damas'])
+    // The bowl has no French text: it stays English, and so does its country.
+    expect(languageOf('items', 'item-1')).toBe('en')
+    expect(itemRow(itemById.value.get('item-1'), ['country']).name).toBe('Glazed <em>bowl</em>')
+    expect(itemRow(itemById.value.get('item-1'), ['country']).meta).toEqual(['Egypt'])
+  })
+
+  it('stays in defaultLanguage when the site does not follow the display language', async () => {
+    const { countryLabel, itemRow, itemById } = await inFrench({ followDisplayLanguage: false })
+    expect(countryLabel('c-eg')).toBe('Egypt')
+    expect(itemRow(itemById.value.get('item-2')).name).toBe('Mosque lamp')
   })
 })
 

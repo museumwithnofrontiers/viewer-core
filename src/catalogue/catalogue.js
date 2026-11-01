@@ -34,15 +34,20 @@ export const CATALOGUE_DATE_MODE = 'overlap'
  * - `itemById`: every item, the visible rule not applied — a page that
  *   deliberately shows a hidden item (a timeline's illustration) reads it.
  *   `partnerById`, `countryById`, `dynastyById`: the visible records.
- * - `itemLabel(item)`, `countryLabel(id)`, `partnerLabel(id)`,
- *   `dynastyLabel(id)`: plain text, `''` for nothing.
+ * - `itemLabel(item)`, `countryLabel(id, lang)`, `partnerLabel(id, lang)`,
+ *   `dynastyLabel(id, lang)`: plain text, `''` for nothing, in `lang` when
+ *   given (the language of the record the name stands next to), in the
+ *   display language otherwise.
  * - `itemRoute(item)`, `partnerRoute(partner)`: the `item` and `partner`
  *   routes by name.
  * - `itemRow(item, meta)`: the row `RecordList`/`RecordGrid`/
  *   `RelatedRecords` share. `meta` lists what follows the name, in order:
  *   `'country'`, `'dates'`, `'location'`, `'dynasties'`, `'holder'` (the
  *   partner's name, only when the package carries the partner, so a label
- *   is never an id), or a function `(item, text) => string`.
+ *   is never an id), or a function `(item, text, lang) => string`. The row
+ *   reads the item in the display language when it has text there, in
+ *   English otherwise, and names its country, dynasties and partner in that
+ *   same language.
  */
 export function useCatalogue(options = {}) {
   const data = useCatalogueData(options)
@@ -59,30 +64,32 @@ export function useCatalogue(options = {}) {
   const dynastyById = data.index('dynasties')
 
   const itemLabel = (item) => (item ? labelOf('items', item.id) : '')
-  const countryLabel = (id) => (id ? labelOf('countries', id) : '')
-  const partnerLabel = (id) => (id ? labelOf('partners', id) : '')
-  const dynastyLabel = (id) => (id ? labelOf('dynasties', id) : '')
+  const countryLabel = (id, lang) => (id ? labelOf('countries', id, { lang }) : '')
+  const partnerLabel = (id, lang) => (id ? labelOf('partners', id, { lang }) : '')
+  const dynastyLabel = (id, lang) => (id ? labelOf('dynasties', id, { lang }) : '')
 
   const itemRoute = (item) => ({ name: 'item', params: { id: item.id } })
   const partnerRoute = (partner) => ({ name: 'partner', params: { id: partner.id } })
 
+  // Each takes the language the row's record is shown in, so its names match it.
   const META = {
-    country: (item) => countryLabel(item.country_id),
+    country: (item, text, lang) => countryLabel(item.country_id, lang),
     dates: (item, text) => text.dates,
     location: (item, text) => text.location,
-    dynasties: (item) => (item.dynasty_ids ?? []).map(dynastyLabel).filter(Boolean).join(', '),
-    holder: (item) => (partnerById.value.has(item.partner_id) ? partnerLabel(item.partner_id) : ''),
+    dynasties: (item, text, lang) => (item.dynasty_ids ?? []).map((id) => dynastyLabel(id, lang)).filter(Boolean).join(', '),
+    holder: (item, text, lang) => (partnerById.value.has(item.partner_id) ? partnerLabel(item.partner_id, lang) : ''),
   }
 
   function itemRow(item, meta = ['country', 'dates']) {
-    const text = tr('items', item.id)
+    const lang = data.languageOf('items', item.id)
+    const text = tr('items', item.id, lang)
     return {
       id: item.id,
       image: item.images?.[0]?.url ?? '',
       imageAlt: itemLabel(item),
       name: mdInline(text.name ?? item.internal_name ?? item.id),
       meta: meta
-        .map((part) => (typeof part === 'function' ? part(item, text) : META[part]?.(item, text)))
+        .map((part) => (typeof part === 'function' ? part(item, text, lang) : META[part]?.(item, text, lang)))
         .filter(Boolean),
       badge: item.type ?? '',
       to: itemRoute(item),
