@@ -5,7 +5,7 @@ export {
   CATALOGUE_DATE_MODE, CATALOGUE_PAGE_SIZE, objectsAndMonumentsSummary, useCatalogue,
 } from './catalogue/catalogue.js'
 export {
-  searchFieldLabel, searchFieldOptions, searchFields, searchRowKeys, searchRows, searchSummary, searchedFor,
+  SEARCH_LANGUAGE_KEY, searchFieldLabel, searchFieldOptions, searchFields, searchRowKeys, searchRows, searchSummary, searchedFor,
   useFieldSearch, useSearchFieldOptions,
 } from './catalogue/fieldSearch.js'
 export { useDataPackage } from './composables/useDataPackage.js'

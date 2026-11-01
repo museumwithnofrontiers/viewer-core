@@ -1,7 +1,7 @@
 import { afterEach, beforeAll, describe, expect, it } from 'vitest'
 import { ref } from 'vue'
 import {
-  CATALOGUE_DATE_MODE, CATALOGUE_PAGE_SIZE, bindDisplayLanguage, loadEntities, objectsAndMonumentsSummary, useDataPackage, searchFieldLabel, searchFieldOptions,
+  CATALOGUE_DATE_MODE, CATALOGUE_PAGE_SIZE, SEARCH_LANGUAGE_KEY, bindDisplayLanguage, loadEntities, objectsAndMonumentsSummary, useDataPackage, searchFieldLabel, searchFieldOptions,
   searchFields, searchRowKeys, searchRows, searchSummary, searchedFor, useCatalogue, useFieldSearch,
 } from '../src/index.js'
 
@@ -156,9 +156,12 @@ describe('the field search', () => {
   })
 
   it('spells out what was searched, with a site’s own extras last', () => {
-    const filters = { q: 'bowl', field: 'name', q2: 'Cairo', field2: 'location', op2: 'OR', from: '900', lang: 'fr', epm: '1' }
+    const filters = { q: 'bowl', field: 'name', q2: 'Cairo', field2: 'location', op2: 'OR', from: '900', searchlanguage: 'fr', epm: '1' }
     const extras = [(f) => (f.epm === '1' ? '+ Explore' : '')]
     expect(searchedFor(filters, t, { extras })).toEqual(['Name: "bowl"', 'OR Location: "Cairo"', 'From 900', 'Language: FR', '+ Explore'])
+    // `lang` is the language the website is read in, never the search's.
+    expect(SEARCH_LANGUAGE_KEY).toBe('searchlanguage')
+    expect(searchedFor({ q: 'bowl', lang: 'fr' }, t)).toEqual(['Keywords: "bowl"'])
     expect(searchSummary({ filters: {}, t, pageInfo: { total: 3 } })).toEqual([
       { label: 'You searched for', value: 'all items' },
       { label: 'Items found', count: 3 },

@@ -1,3 +1,16 @@
+## 2.12.0 (2026-11-01)
+
+Part of the Islamic Art item sheet, results and entrances (museumwithnofrontiers/inventory-app#2414).
+
+### Fixed
+
+- The field search's language is the query's `searchlanguage`
+  (`SEARCH_LANGUAGE_KEY`, legacy's own name), no longer `lang`. `lang`
+  carries the language the website is read in, so every search was narrowed
+  to the visitor's display language ("Search language: FR" for a French
+  visitor), where legacy searched every language unless one was picked. A
+  results spec lists `searchlanguage` in its `keys` in place of `lang`.
+
 ## 2.11.0 (2026-11-01)
 
 Part of the Islamic Art item sheet, results and entrances (museumwithnofrontiers/inventory-app#2414).
