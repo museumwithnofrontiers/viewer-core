@@ -105,6 +105,14 @@ export function searchRows(filters, count = 4) {
   return rows
 }
 
+/**
+ * The query key of the search language: legacy's own `searchlanguage`. Never
+ * `lang`, which carries the language the website is read in: a visitor
+ * reading in French still searches every language, as on legacy, unless
+ * they pick one.
+ */
+export const SEARCH_LANGUAGE_KEY = 'searchlanguage'
+
 /** The query keys `searchRows` reads, for a results spec's `keys`. */
 export function searchRowKeys(count = 4) {
   const keys = ['q', 'field']
@@ -125,7 +133,8 @@ export function searchedFor(filters, t, { rows = 4, extras = [] } = {}) {
     .map((row, i) => `${i > 0 ? `${row.cond} ` : ''}${searchFieldLabel(row.field, t)}: "${row.keyword}"`)
   if (filters.from) parts.push(`${t('catalogue.filter.from')} ${filters.from}`)
   if (filters.to) parts.push(`${t('catalogue.filter.to')} ${filters.to}`)
-  if (filters.lang) parts.push(`${t('catalogue.search.language')}: ${String(filters.lang).toUpperCase()}`)
+  const language = filters[SEARCH_LANGUAGE_KEY]
+  if (language) parts.push(`${t('catalogue.search.language')}: ${String(language).toUpperCase()}`)
   for (const extra of extras) {
     const part = extra(filters, t)
     if (part) parts.push(part)
@@ -149,7 +158,7 @@ export function searchSummary({ filters, t, pageInfo }, options = {}) {
  * The index behind the results page: one long-lived `useKeywordIndex` over
  * `entity` (`fields` grammar, legacy's `rank: 'hits'` order, the glossary
  * and country expansions of `database_results.php`), its search language
- * kept in step with the query's `lang`. `narrow(list, filters)` is a results
+ * kept in step with the query's `searchlanguage`. `narrow(list, filters)` is a results
  * spec's `narrow`: the matches in rank order, kept to what `list` (the
  * records the spec's `scope` let through) carries. Pass `sort: false` to the
  * spec, so the rank order stands.
@@ -165,7 +174,7 @@ export function useFieldSearch({
   const index = useKeywordIndex(entity, { grammar: 'fields', fields, language, rank, expand })
 
   function narrow(list, filters) {
-    language.value = filters.lang || ''
+    language.value = filters[SEARCH_LANGUAGE_KEY] || ''
     const matches = index.search(searchRows(filters, rows))
     if (!list) return matches
     const allowed = new Set(list.map((record) => record.id))
