@@ -8,6 +8,7 @@ export {
   SEARCH_LANGUAGE_KEY, searchFieldLabel, searchFieldOptions, searchFields, searchRowKeys, searchRows, searchSummary, searchedFor,
   useFieldSearch, useSearchFieldOptions,
 } from './catalogue/fieldSearch.js'
+export { collate, useLegacySearch } from './catalogue/legacySearch.js'
 export { useDataPackage } from './composables/useDataPackage.js'
 export { byId, entityRef, loadEntities, useEntities } from './composables/useEntities.js'
 export { resolveRecordLanguage, useRecordLanguage } from './composables/useRecordLanguage.js'

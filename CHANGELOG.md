@@ -1,3 +1,22 @@
+## 2.13.0 (2026-11-01)
+
+Part of the Islamic Art search (museumwithnofrontiers/inventory-app#2415).
+
+### Added
+
+- **`useLegacySearch`**: the standalone sites' Database search as legacy's
+  `database_results.php` ran it (decision D3). Up to four keyword rows
+  joined by AND/OR, each a substring of what its field searches, compared as
+  `utf8_general_ci` did (`collate`: no case, no accents on a Latin letter,
+  dotless ı as i; an Arabic vowel sign or hamza still counts).
+  With no search language a record matches through any one of its
+  translations, every row within that same translation. A word naming a
+  country in any of its names finds that country's records in the
+  `countryFields`; a glossary term searches its spellings in the language
+  the site is read in, in the `glossaryFields`. A site's `score` gives
+  legacy's relevance; matches come most relevant first, then by start date,
+  an undated record first. `useFieldSearch` is unchanged.
+
 ## 2.12.0 (2026-11-01)
 
 Part of the Islamic Art item sheet, results and entrances (museumwithnofrontiers/inventory-app#2414).
