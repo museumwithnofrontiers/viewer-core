@@ -28,6 +28,9 @@ export function useGalleryData(config = {}) {
 
   const catalogue = useCatalogueData({
     eager: config.eager ?? DEFAULT_EAGER,
+    // English-first until these pages are checked against legacy in other
+    // languages (the display-language rule, inventory-app#2414).
+    followDisplayLanguage: false,
   })
 
   const {

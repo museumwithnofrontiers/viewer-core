@@ -1,6 +1,7 @@
 import { createApp } from 'vue'
 import AppRoot from './AppRoot.vue'
 import { useDataPackage } from './composables/useDataPackage.js'
+import { bindDisplayLanguage } from './displayLanguage.js'
 import { createI18n } from './i18n/index.js'
 import { connectLanguageToRouter, resolveInitialLanguage } from './i18n/language.js'
 import { VIEWER_CONFIG } from './injectionKeys.js'
@@ -24,6 +25,7 @@ export function createViewer(config = {}) {
   app.use(i18n)
 
   connectLanguageToRouter({ locale: i18n.locale, offered: languages, router })
+  bindDisplayLanguage(i18n.locale)
 
   return app
 }

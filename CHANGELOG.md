@@ -1,4 +1,41 @@
-## 2.10.0 (unreleased)
+## 2.11.0 (2026-11-01)
+
+Part of the Islamic Art item sheet, results and entrances (museumwithnofrontiers/inventory-app#2414).
+
+### Changed
+
+- Displayed data follows the display language, reference data included. The
+  catalogue layer (`useCatalogueData`, `useCatalogue`) read every list, label
+  and fallback in English. `tr` and the labels now read the language the
+  website is shown in, and fall back to English record by record. A row
+  (`itemRow`) shows its item in the display language when the item has text
+  there, otherwise in English. Its country, dynasties and partner are named
+  in that same language, as legacy's lists did: on legacy's French
+  Permanent Collection an object with no French text reads "Turin, Italy",
+  the others "Rome, Italie". The glossary binding reads the display language too.
+- `loadEnglish()` also loads the display language for the eager entities,
+  and loads it again whenever the language changes.
+
+### Added
+
+- `displayLanguage` (read-only) and `bindDisplayLanguage(locale)`.
+  `createViewer` binds the application's locale, so code built outside a
+  component (a site's `data.js`) reads it.
+- `languageOf(entity, id)`: the language a record is shown in.
+- `labelOf(entity, id, { lang })`, `countryLabel(id, lang)`,
+  `partnerLabel(id, lang)`, `dynastyLabel(id, lang)`: a name in the language
+  of the record it stands next to. `itemRow` passes that language to a meta
+  function as its third argument.
+- `useCatalogueData({ followDisplayLanguage: false })` keeps the old
+  English-first reading.
+
+### Unchanged (`/dxa`)
+
+- The gallery and exhibition layers pass `followDisplayLanguage: false`.
+  They stay English-first until their pages are checked against legacy in
+  other languages.
+
+## 2.10.0 (2026-10-25)
 
 Part of the legacy-parity check of 2026-10-25 (museumwithnofrontiers/inventory-app#2338).
 
