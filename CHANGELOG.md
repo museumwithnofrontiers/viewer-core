@@ -1,3 +1,14 @@
+## 2.14.0 (2026-11-02)
+
+Part of the Baroque Art item sheet (museumwithnofrontiers/inventory-app#2417).
+
+### Added
+
+- **`tIn(language, key)`** beside `t` on `createI18n`/`useI18n`: a text in a
+  language of the caller's choosing, English where it has none. The
+  standalone sites' sheets print their labels in the record's language,
+  as legacy's `db_GetTERM` did, whatever language the site is read in.
+
 ## 2.13.0 (2026-11-01)
 
 Part of the Islamic Art search (museumwithnofrontiers/inventory-app#2415).
