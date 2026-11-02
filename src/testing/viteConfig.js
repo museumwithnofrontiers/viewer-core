@@ -54,6 +54,9 @@ export function defineViewerConfig({
     test: {
       environment: 'jsdom',
       testTimeout: 60000,
+      // Node 26 has a `localStorage` of its own, which hides jsdom's from the
+      // tests: without a storage file it is undefined.
+      execArgv: ['--no-experimental-webstorage'],
       server: {
         deps: {
           // viewer-core ships .vue source; Node cannot load it unless Vitest

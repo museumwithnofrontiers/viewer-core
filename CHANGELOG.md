@@ -13,7 +13,8 @@ Part of the Baroque Art search (museumwithnofrontiers/inventory-app#2418).
 
 - **The tests run on Node 26**, now the LTS the CI installs: Node's own
   `localStorage` hid jsdom's, and 24 tests failed. The test runner turns
-  Node's Web Storage off.
+  Node's Web Storage off, and so does `defineViewerConfig` for every
+  website's tests (two websites' tests cleared it).
 
 ## 2.14.0 (2026-11-02)
 
