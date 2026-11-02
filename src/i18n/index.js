@@ -47,18 +47,23 @@ export function mergeMessages(...catalogues) {
 export function createI18n({ messages = {}, locale = BASE_LANGUAGE } = {}) {
   const current = ref(locale)
 
-  const t = (key) => {
-    const active = messages[current.value]
+  // A text in a language of the caller's choosing (a record's own, say),
+  // English where that language has none.
+  const tIn = (language, key) => {
+    const active = messages[language]
     if (active && typeof active[key] === 'string') return active[key]
     const base = messages[BASE_LANGUAGE]
     if (base && typeof base[key] === 'string') return base[key]
     return key
   }
 
+  const t = (key) => tIn(current.value, key)
+
   const i18n = {
     locale: current,
     availableLocales: Object.keys(messages),
     t,
+    tIn,
     install(app) {
       app.provide(VIEWER_I18N, i18n)
       // `$t` in a template, `useI18n()` in a script — the two shapes Vue

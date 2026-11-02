@@ -40,6 +40,14 @@ describe('createI18n', () => {
     expect(i18n.t('core.nav.home')).toBe('Accueil')
   })
 
+  it('reads a language of the caller’s choosing, whatever the active one, English as its fallback', () => {
+    const i18n = createI18n({ messages, locale: 'en' })
+    expect(i18n.tIn('fr', 'core.nav.home')).toBe('Accueil')
+    expect(i18n.tIn('fr', 'core.nav.backToList')).toBe('Back to the list')
+    expect(i18n.tIn('cs', 'core.nav.home')).toBe('Home')
+    expect(i18n.t('core.nav.home')).toBe('Home')
+  })
+
   it('provides $t to templates and useI18n() to scripts', () => {
     const i18n = createI18n({ messages })
     const Probe = defineComponent({
