@@ -28,6 +28,11 @@ describe('vite entry', () => {
     expect(keys).toContain('test')
   })
 
+  it("turns Node's own Web Storage off for a website's tests, so jsdom's localStorage is the one they see", async () => {
+    const { defineViewerConfig } = await import('../src/testing/viteConfig.js')
+    expect(defineViewerConfig({ dataPackage: '@museumwnf/x-data' }).test.execArgv).toEqual(['--no-experimental-webstorage'])
+  })
+
   it('fails to import from ./testing barrel in plain Node context (control)', () => {
     // Document why the vite entry is separate: the barrel reaches a .vue file,
     // which Node cannot parse without Vite/Vitest's transform.

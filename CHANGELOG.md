@@ -1,3 +1,21 @@
+## 2.15.0 (2026-11-02)
+
+Part of the Baroque Art search (museumwithnofrontiers/inventory-app#2418).
+
+### Added
+
+- **`useLegacySearch` hands its `fields` and `score` functions the
+  translation's language**, as a last argument: a field can read a related
+  record's text in the same language, as legacy's joins did (Discover
+  Baroque Art's monuments matched through their special features).
+
+### Fixed
+
+- **The tests run on Node 26**, now the LTS the CI installs: Node's own
+  `localStorage` hid jsdom's, and 24 tests failed. The test runner turns
+  Node's Web Storage off, and so does `defineViewerConfig` for every
+  website's tests (two websites' tests cleared it).
+
 ## 2.14.0 (2026-11-02)
 
 Part of the Baroque Art item sheet (museumwithnofrontiers/inventory-app#2417).

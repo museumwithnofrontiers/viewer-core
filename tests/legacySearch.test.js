@@ -84,6 +84,17 @@ describe('the legacy Database search', () => {
     expect(ready.value).toBe(true)
   })
 
+  it("hands a field and a score the translation's language, to read a related record's text in it", () => {
+    const seen = new Set()
+    const { narrow } = search({
+      fields: { keyword: (record, text, language) => (language === 'fr' ? [text.name] : []) },
+      score: { keyword: (like, record, text, inCountry, language) => (seen.add(language), 0) },
+    })
+    expect(run(narrow, { q: 'carreau' })).toEqual(['o4'])
+    expect(run(narrow, { q: 'iznik tile' })).toEqual([])
+    expect([...seen].sort()).toEqual(['en', 'fr'])
+  })
+
   it('keeps every record of the list, by start date, with no keyword', () => {
     const { narrow } = search()
     expect(run(narrow, {})).toEqual(['o3', 'o1', 'o2', 'o4'])

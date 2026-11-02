@@ -11,5 +11,8 @@ export default defineConfig({
   },
   test: {
     environment: 'jsdom',
+    // Node 26 has a `localStorage` of its own, which hides jsdom's from the
+    // tests: without a storage file it is undefined.
+    execArgv: ['--no-experimental-webstorage'],
   },
 })
