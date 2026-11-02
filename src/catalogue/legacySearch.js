@@ -56,15 +56,18 @@ function byStartDate(a, b) {
 }
 
 /**
- * `fields`: `{ [field]: (record, text) => string | string[] }`, what each
- * field of the form searches in a record and one of its translations.
+ * `fields`: `{ [field]: (record, text, language) => string | string[] }`,
+ * what each field of the form searches in a record and one of its
+ * translations, given that translation's language (so a field can read a
+ * related record's text in the same language, as legacy's joins did).
  * `countryFields`: the fields in which a word naming a country (in any of
  * its names) also finds the records of that country.
  * `glossaryFields`: the fields in which a glossary term also searches its
  * spellings in the site's language.
- * `score`: `{ [field]: (like, record, text, inCountry) => number }`, the
- * relevance a matching row adds, `like(value)` telling whether a value holds
- * the row's own word. Summed over the rows, the best translation counting.
+ * `score`: `{ [field]: (like, record, text, inCountry, language) => number }`,
+ * the relevance a matching row adds, `like(value)` telling whether a value
+ * holds the row's own word. Summed over the rows, the best translation
+ * counting.
  *
  * Returns `narrow(list, filters, helpers)` for a results spec (pass it
  * `sort: false`): the records of `list` that match, in legacy's order.
@@ -88,13 +91,13 @@ export function useLegacySearch({
   // translation object, so a file loaded again starts afresh.
   const folded = new WeakMap()
 
-  function hayOf(field, record, text) {
+  function hayOf(field, record, text, language) {
     let byField = folded.get(text)
     if (!byField) folded.set(text, (byField = new Map()))
     let hay = byField.get(field)
     if (!hay) {
       const getter = fields[field] ?? fields.keyword
-      byField.set(field, (hay = strings(getter(record, text)).map(collate)))
+      byField.set(field, (hay = strings(getter(record, text, language)).map(collate)))
     }
     return hay
   }
@@ -161,13 +164,13 @@ export function useLegacySearch({
         let relevance = 0
         for (const row of active) {
           const inCountry = row.countries.has(record.country_id)
-          const hay = hayOf(row.field, record, text)
+          const hay = hayOf(row.field, record, text, language)
           const hit = inCountry || hay.some((h) => row.needles.some((n) => h.includes(n)))
           if (result === null) result = hit
           else if (String(row.cond).toUpperCase() === 'OR') result = result || hit
           else result = result && hit
           const rank = score[row.field]
-          if (rank) relevance += rank((value) => strings(value).some((v) => collate(v).includes(row.needle)), record, text, inCountry)
+          if (rank) relevance += rank((value) => strings(value).some((v) => collate(v).includes(row.needle)), record, text, inCountry, language)
         }
         if (result === null || result) best = Math.max(best ?? 0, relevance)
       }

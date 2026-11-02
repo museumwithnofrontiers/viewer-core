@@ -1,3 +1,14 @@
+## 2.15.0 (2026-11-02)
+
+Part of the Baroque Art search (museumwithnofrontiers/inventory-app#2418).
+
+### Added
+
+- **`useLegacySearch` hands its `fields` and `score` functions the
+  translation's language**, as a last argument: a field can read a related
+  record's text in the same language, as legacy's joins did (Discover
+  Baroque Art's monuments matched through their special features).
+
 ## 2.14.0 (2026-11-02)
 
 Part of the Baroque Art item sheet (museumwithnofrontiers/inventory-app#2417).
