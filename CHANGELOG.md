@@ -1,3 +1,16 @@
+## 2.16.0 (2026-11-05)
+
+Part of the galleries' text pages (museumwithnofrontiers/inventory-app#2423).
+
+### Added
+
+- **`renderBlock(text, { blankLines: true })`, and `I18nText`'s
+  `blank-lines`**, keep the number of blank lines between two blocks: each
+  one is a `<br>`. Legacy's text pages were HTML, and a gallery's Credits put
+  two blank lines where it put one elsewhere; Markdown reads any run of blank
+  lines as one paragraph break. Off by default: every other text renders as
+  before.
+
 ## 2.15.0 (2026-11-02)
 
 Part of the Baroque Art search (museumwithnofrontiers/inventory-app#2418).

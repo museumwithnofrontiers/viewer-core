@@ -51,6 +51,28 @@ describe('rendering a record field', () => {
   })
 })
 
+// Legacy's text pages put one or two blank lines between two blocks, as
+// <br>s; a gallery's Credits keeps the count (inventory-app#2423).
+describe('renderBlock with blankLines', () => {
+  // A paragraph keeps the two spaces of its last line's break.
+  const squash = (html) => html.replace(/\n/g, '').replace(/ +<\/p>/g, '</p>')
+
+  it('renders each blank line between two blocks as a <br>', () => {
+    expect(squash(renderBlock('One  \n  \nTwo', { blankLines: true }))).toBe('<p>One</p><br><p>Two</p>')
+    expect(squash(renderBlock('One  \n  \n  \nTwo', { blankLines: true }))).toBe('<p>One</p><br><br><p>Two</p>')
+    expect(squash(renderBlock('One\n\n\n\nTwo', { blankLines: true }))).toBe('<p>One</p><br><br><br><p>Two</p>')
+  })
+
+  it('keeps the line breaks inside a block, and a list a block of its own', () => {
+    expect(squash(renderBlock('**Team**  \nName  \n  \n- one\n- two', { blankLines: true })))
+      .toBe('<p><strong>Team</strong><br>Name</p><br><ul><li>one</li><li>two</li></ul>')
+  })
+
+  it('leaves the default untouched: any run of blank lines is one paragraph break', () => {
+    expect(squash(renderBlock('One  \n  \n  \nTwo'))).toBe('<p>One</p><p>Two</p>')
+  })
+})
+
 describe('renderPlain', () => {
   it('reads a heading, a list and a paragraph as one line', () => {
     expect(renderPlain('# Title\n\n- one\n- two\n\nBody **text**.')).toBe('Title one two Body text.')
