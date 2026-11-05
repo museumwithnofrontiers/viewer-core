@@ -1,7 +1,7 @@
 import { dateRange, eraLabel, roundOutward, withEraWords, yearBucketsFromRange } from '../../catalogue/dates.js'
 import { GALLERY_ERA_WORDS } from './eraWords.js'
 import { useTimelineEvents } from '../../catalogue/timeline.js'
-import { PAGE_SIZE } from '../shared.js'
+import { GALLERY_PAGE_SIZE } from '../shared.js'
 
 export { eraLabel, roundOutward }
 
@@ -110,8 +110,8 @@ export function useGalleryTimeline(data, collection, config = {}) {
     keys: ['country', 'begin', 'end'],
     scope: (item, filters) => inTimelineScope(item, filters.country),
     dates: { mode: 'overlap' },
-    sort: { undated: 'first' },
-    pageSize: PAGE_SIZE,
+    sort: { undated: 'first', tiebreak: collection.legacyOrder },
+    pageSize: GALLERY_PAGE_SIZE,
     variant: 'grid',
     recordRoute: 'item',
     actionLabel: 'catalogue.results.seeDatabaseEntry',

@@ -1,7 +1,7 @@
 import { projectLabel } from '../../conventions.js'
-import { DATE_MODE, FACET_CATEGORIES, PAGE_SIZE } from '../shared.js'
+import { DATE_MODE, FACET_CATEGORIES, GALLERY_PAGE_SIZE } from '../shared.js'
 
-export { DATE_MODE, FACET_CATEGORIES, FACET_LABEL_KEYS, PAGE_SIZE, useFacetLabels } from '../shared.js'
+export { DATE_MODE, FACET_CATEGORIES, FACET_LABEL_KEYS, GALLERY_PAGE_SIZE, PAGE_SIZE, useFacetLabels } from '../shared.js'
 
 // The catalogue spec: what a DXA gallery's lists filter and search on. The
 // engine — query state, options, dates, pages, the boolean grammar — is
@@ -97,23 +97,38 @@ export function useGalleryCollection(data, config = {}) {
   /**
    * A record as viewer-layout's grid contract: the thumbnail, the name, the
    * lines legacy's hover card carried (date, holder, place, source
-   * project).
+   * project). The same lines one by one (`date`, `partner`, `place`,
+   * `project`), for a card that sets each its own way, as legacy's
+   * ObjectGrid did.
    */
   function tile(item, t) {
     const text = tr('items', item.id, defaultLang)
+    const date = text.dates ?? ''
+    const partner = labelOf('partners', item.partner_id)
+    const place = [text.location, labelOf('countries', item.country_id)].filter(Boolean).join(', ')
+    const project = projectLabel(manifest, item.project_id, defaultLang) ?? ''
     return {
       id: item.id,
       image: item.images?.[0]?.url ?? '',
       imageAlt: labelOf('items', item.id),
       name: mdInline(text.name ?? item.internal_name ?? ''),
-      meta: [
-        text.dates ?? '',
-        labelOf('partners', item.partner_id),
-        [text.location, labelOf('countries', item.country_id)].filter(Boolean).join(', '),
-        `${t('catalogue.results.forProject')} ${projectLabel(manifest, item.project_id, defaultLang) ?? ''}`,
-      ].filter(Boolean),
+      meta: [date, partner, place, `${t('catalogue.results.forProject')} ${project}`].filter(Boolean),
+      date,
+      partner,
+      place,
+      project,
       to: itemRoute(item),
     }
+  }
+
+  // Legacy's order among records of one year (the specs' `sort.tiebreak`):
+  // dxa-api's `ORDER BY startDate, countryName, partnerName`, then MySQL's
+  // own order, which is the table's key: the record's legacy key, its
+  // numbers compared as numbers (inventory-app#2423).
+  function legacyOrder(a, b) {
+    return compareText(labelOf('countries', a.country_id), labelOf('countries', b.country_id))
+      || compareText(labelOf('partners', a.partner_id), labelOf('partners', b.partner_id))
+      || compareKeys(a.backward_compatibility, b.backward_compatibility)
   }
 
   // ── The results page, as a spec ──────────────────────────────────────
@@ -149,8 +164,8 @@ export function useGalleryCollection(data, config = {}) {
     facetScope: 'matching',
     filterMode: 'immediate',
     dates: { mode: DATE_MODE, begin: 'from', end: 'to' },
-    sort: { undated: 'first' },
-    pageSize: PAGE_SIZE,
+    sort: { undated: 'first', tiebreak: legacyOrder },
+    pageSize: GALLERY_PAGE_SIZE,
     variant: 'grid',
     recordRoute: 'item',
     actionLabel: 'catalogue.results.seeDatabaseEntry',
@@ -166,7 +181,26 @@ export function useGalleryCollection(data, config = {}) {
   }
 
   return {
-    FACETS, hasEveryTag, haystack, tile, collectionResults,
+    FACETS, hasEveryTag, haystack, tile, legacyOrder, collectionResults,
     countryIdForCode, tagIdForLegacy, tagLabelForLegacy,
   }
+}
+
+function compareText(a, b) {
+  return String(a ?? '').localeCompare(String(b ?? ''), 'en', { sensitivity: 'base' })
+}
+
+// Two legacy keys (`mwnf3:objects:ISL:dz:Mus01:24`), segment by segment, a
+// number against a number as numbers.
+function compareKeys(a, b) {
+  const left = String(a ?? '').split(':')
+  const right = String(b ?? '').split(':')
+  for (let i = 0; i < Math.max(left.length, right.length); i++) {
+    const x = left[i] ?? ''
+    const y = right[i] ?? ''
+    if (x === y) continue
+    if (/^\d+$/.test(x) && /^\d+$/.test(y)) return Number(x) - Number(y)
+    return x.localeCompare(y, 'en')
+  }
+  return 0
 }

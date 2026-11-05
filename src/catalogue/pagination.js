@@ -45,13 +45,20 @@ export function usePagination(list, { page = 1, size = DEFAULT_SIZE } = {}) {
 /**
  * Chronological order by `key` (a record's `start_date`), undated records
  * last — or first, with `undated: 'first'`. Stable: two records of the same
- * year keep the order they arrived in. Returns a new array.
+ * year keep the order they arrived in, or the order `tiebreak(a, b)` gives
+ * them (a family's own, e.g. the galleries' `legacyOrder`). Returns a new
+ * array.
  */
-export function sortChronological(list, { key = 'start_date', undated = 'last' } = {}) {
+export function sortChronological(list, { key = 'start_date', undated = 'last', tiebreak = null } = {}) {
   const missing = undated === 'first' ? -Infinity : Infinity
   const year = (record) => {
     const value = record?.[key]
     return typeof value === 'number' && Number.isFinite(value) ? value : missing
   }
-  return [...(list ?? [])].sort((a, b) => year(a) - year(b))
+  const byYear = (a, b) => {
+    const ya = year(a)
+    const yb = year(b)
+    return ya === yb ? 0 : ya - yb
+  }
+  return [...(list ?? [])].sort((a, b) => byYear(a, b) || (tiebreak ? tiebreak(a, b) : 0))
 }

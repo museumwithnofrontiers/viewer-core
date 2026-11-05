@@ -1,4 +1,4 @@
-import { PAGE_SIZE } from '../shared.js'
+import { GALLERY_PAGE_SIZE } from '../shared.js'
 
 // The partner pages, as specs: what viewer-layout's `PartnerListView`,
 // `RecordView` and `CatalogueResultsView` render on `/partners`,
@@ -59,18 +59,18 @@ export function useGalleryPartner(data, collection, config = {}) {
   // results and the timeline gallery use. `scope` is built per-page in the
   // site's own PartnerObjects.vue, over the route's own id —
   // `CatalogueResultsView` takes no record id of its own, unlike
-  // `RecordView`.
+  // `RecordView`. Legacy's page (PartnerObjects.vue) printed no count.
   const partnerObjects = {
     entity: 'items',
-    sort: { undated: 'first' },
-    pageSize: PAGE_SIZE,
+    sort: { undated: 'first', tiebreak: collection.legacyOrder },
+    pageSize: GALLERY_PAGE_SIZE,
     variant: 'grid',
     recordRoute: 'item',
     actionLabel: 'catalogue.results.seeDatabaseEntry',
     empty: 'gallery.partner.noObjects',
     pagination: { jump: true },
     record: (item, { t }) => tile(item, t),
-    summary: ({ pageInfo, t }) => [{ count: pageInfo.total, value: t('partner.item.objectsInSite') }],
+    summary: () => [],
   }
 
   return { partnerList, partnerSheet, partnerObjects }

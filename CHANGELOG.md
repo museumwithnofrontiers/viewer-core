@@ -17,6 +17,22 @@ Part of the galleries' text pages (museumwithnofrontiers/inventory-app#2423).
   and "BC". The gallery timeline's year lists and summary and the item
   sheet's timeline read them, and the timeline spec carries them as
   `eraWords` for the views that print years.
+- **`sortChronological`'s `tiebreak`**: the order of two records of the same
+  year. The galleries' is `legacyOrder` (`useGalleryCollection`): dxa-api's
+  `ORDER BY startDate, countryName, partnerName`, then the legacy key, its
+  numbers as numbers, which is the order legacy's table returned them in.
+- **`GALLERY_PAGE_SIZE`** (`/dxa`, 20): a gallery's pages show twenty tiles,
+  dxa-api's own page size, as legacy's did (the shared `PAGE_SIZE` stays 9
+  for the exhibitions).
+- **A gallery tile carries its card's lines one by one** (`date`, `partner`,
+  `place`, `project`) beside `meta`, for legacy's ObjectGrid card.
+
+### Changed
+
+- **A gallery's lists of objects** (collection results, timeline gallery, a
+  partner's objects) show twenty a page and order the records of one year as
+  legacy did.
+- **A partner's objects page** prints no count, as legacy's did not.
 
 ## 2.15.0 (2026-11-02)
 

@@ -11,6 +11,13 @@ import { useI18n } from '../i18n/index.js'
 export const PAGE_SIZE = 9
 
 /**
+ * A gallery's pages show twenty tiles: dxa-api's own page size
+ * (`API_PAGESIZE`), which the gallery client never overrode — measured on
+ * Ceramics' collection results, 20 tiles a page (inventory-app#2423).
+ */
+export const GALLERY_PAGE_SIZE = 20
+
+/**
  * Decision D5: the DXA sites test containment — `na <= start_date` and
  * `nz >= coalesce(end_date, start_date)` in `Objects.blade.php` — so an
  * undated record is out the moment a bound is set.

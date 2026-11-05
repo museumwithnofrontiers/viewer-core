@@ -19,7 +19,7 @@
 //   const sheet = useGallerySheet(data)
 
 // Shared verbatim by both families — see shared.js.
-export { DATE_MODE, FACET_CATEGORIES, FACET_LABEL_KEYS, PAGE_SIZE, useFacetLabels } from './shared.js'
+export { DATE_MODE, FACET_CATEGORIES, FACET_LABEL_KEYS, GALLERY_PAGE_SIZE, PAGE_SIZE, useFacetLabels } from './shared.js'
 
 export { useGalleryData } from './gallery/useGalleryData.js'
 export { useGalleryCollection } from './gallery/useGalleryCollection.js'
