@@ -1,4 +1,5 @@
-import { dateRange, eraLabel, roundOutward, yearBucketsFromRange } from '../../catalogue/dates.js'
+import { dateRange, eraLabel, roundOutward, withEraWords, yearBucketsFromRange } from '../../catalogue/dates.js'
+import { GALLERY_ERA_WORDS } from './eraWords.js'
 import { useTimelineEvents } from '../../catalogue/timeline.js'
 import { PAGE_SIZE } from '../shared.js'
 
@@ -84,9 +85,10 @@ export function useGalleryTimeline(data, collection, config = {}) {
     route: 'timeline-results',
     controls: [
       { key: 'country' },
-      { key: 'begin', options: (ctx) => yearBucketsFromRange(ctx.years.min, ctx.years.max, ctx.t) },
-      { key: 'end', options: (ctx) => yearBucketsFromRange(ctx.years.min, ctx.years.max, ctx.t) },
+      { key: 'begin', options: (ctx) => yearBucketsFromRange(ctx.years.min, ctx.years.max, withEraWords(ctx.t, GALLERY_ERA_WORDS)) },
+      { key: 'end', options: (ctx) => yearBucketsFromRange(ctx.years.min, ctx.years.max, withEraWords(ctx.t, GALLERY_ERA_WORDS)) },
     ],
+    eraWords: GALLERY_ERA_WORDS,
     gallery: {
       route: 'timeline-gallery',
       items: (ctx) => timelineGalleryItems(ctx.filters),
@@ -127,8 +129,8 @@ export function useGalleryTimeline(data, collection, config = {}) {
         value: countryId ? labelOf('countries', countryId) : t('timeline.form.allCountries'),
       }]
       if (begin != null || end != null) {
-        const from = begin != null ? eraLabel(begin, t) : t('timeline.form.earliest')
-        const to = end != null ? eraLabel(end, t) : t('timeline.form.latest')
+        const from = begin != null ? eraLabel(begin, withEraWords(t, GALLERY_ERA_WORDS)) : t('timeline.form.earliest')
+        const to = end != null ? eraLabel(end, withEraWords(t, GALLERY_ERA_WORDS)) : t('timeline.form.latest')
         parts.push({ value: `${from} ${t('timeline.form.to')} ${to}` })
       }
       parts.push({ count: pageInfo.total, value: t('catalogue.results.objects') })

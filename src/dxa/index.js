@@ -19,11 +19,12 @@
 //   const sheet = useGallerySheet(data)
 
 // Shared verbatim by both families — see shared.js.
-export { DATE_MODE, FACET_CATEGORIES, FACET_LABEL_KEYS, PAGE_SIZE, useFacetLabels } from './shared.js'
+export { DATE_MODE, FACET_CATEGORIES, FACET_LABEL_KEYS, GALLERY_PAGE_SIZE, PAGE_SIZE, useFacetLabels } from './shared.js'
 
 export { useGalleryData } from './gallery/useGalleryData.js'
 export { useGalleryCollection } from './gallery/useGalleryCollection.js'
 export { useGalleryTimeline } from './gallery/useGalleryTimeline.js'
+export { GALLERY_ERA_WORDS } from './gallery/eraWords.js'
 export { useGalleryPartner } from './gallery/useGalleryPartner.js'
 export { useGallerySheet } from './gallery/useGallerySheet.js'
 export { useGalleryItemDetail } from './gallery/useGalleryItemDetail.js'

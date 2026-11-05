@@ -26,7 +26,7 @@ export { useListQuery } from './catalogue/listQuery.js'
 export { paginate, sortChronological, usePagination } from './catalogue/pagination.js'
 export { facetOptions, useFacets } from './catalogue/facets.js'
 export {
-  centuryPresets, dateRange, eraLabel, inDateRange, roundOutward, yearBuckets, yearBucketsFromRange,
+  centuryPresets, dateRange, eraLabel, inDateRange, roundOutward, withEraWords, yearBuckets, yearBucketsFromRange,
 } from './catalogue/dates.js'
 export { useSearchLanguage } from './catalogue/searchLanguage.js'
 export {

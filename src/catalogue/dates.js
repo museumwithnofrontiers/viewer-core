@@ -183,6 +183,16 @@ export function eraLabel(year, t) {
 }
 
 /**
+ * `t`, with a family's own era words: `words` maps a `catalogue.era.*`
+ * entry to the one to read instead (the galleries' "A.D." and "B.C.",
+ * `GALLERY_ERA_WORDS`). Every other entry reads as before; no `words`, `t`.
+ */
+export function withEraWords(t, words) {
+  if (!words) return t
+  return (key, ...rest) => t(words[key] ?? key, ...rest)
+}
+
+/**
  * A record's dates rounded outward to the century, the window legacy's
  * "Timeline for this item" opens, so a single-year object still lands on a
  * readable stretch of chronology. `[from, to]`, either null when unknown.

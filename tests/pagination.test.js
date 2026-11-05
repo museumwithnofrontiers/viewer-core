@@ -41,6 +41,16 @@ describe('usePagination', () => {
   })
 })
 
+describe('sortChronological tiebreak', () => {
+  it('orders two records of the same year by the tiebreak, the years first', () => {
+    const list = [{ id: 'k12', start_date: 1000 }, { id: 'k4', start_date: 1000 }, { id: 'early', start_date: 950 }, { id: 'none' }]
+    const byNumber = (a, b) => Number(a.id.slice(1)) - Number(b.id.slice(1))
+    expect(sortChronological(list, { undated: 'first', tiebreak: byNumber }).map((r) => r.id)).toEqual(['none', 'early', 'k4', 'k12'])
+    // Without one, arrival order.
+    expect(sortChronological(list, { undated: 'first' }).map((r) => r.id)).toEqual(['none', 'early', 'k12', 'k4'])
+  })
+})
+
 describe('sortChronological', () => {
   const items = [
     { id: 'b', start_date: 1200 },

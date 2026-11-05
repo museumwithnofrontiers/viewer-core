@@ -61,7 +61,30 @@ const record = new Marked({ async: false, gfm: true, breaks: true })
 prose.use(escaping, noCode)
 record.use(escaping, noCode)
 
-const pipeline = (breaks) => (breaks ? record : prose)
+// `blankLines` keeps the number of blank lines between two blocks. Legacy's
+// text pages were HTML, a blank line a `<br>`, and some put two blank lines
+// where others put one; Markdown reads any run of blank lines as one
+// paragraph break. With it, each blank line of the source is a `<br>`
+// between the blocks, and the page sets its paragraphs without margins (a
+// gallery's Credits, inventory-app#2423). A run of N blank lines is one
+// `space` token holding N + 1 newlines.
+const blankLineSpacing = {
+  renderer: {
+    space(token) {
+      const newlines = String(token?.raw ?? '').split('\n').length - 1
+      return '<br>'.repeat(Math.max(0, newlines - 1))
+    },
+  },
+}
+const proseLines = new Marked({ async: false, gfm: true, breaks: false })
+const recordLines = new Marked({ async: false, gfm: true, breaks: true })
+proseLines.use(escaping, noCode, blankLineSpacing)
+recordLines.use(escaping, noCode, blankLineSpacing)
+
+const pipeline = (breaks, blankLines = false) => {
+  if (blankLines) return breaks ? recordLines : proseLines
+  return breaks ? record : prose
+}
 
 const REGEXP_SPECIAL = /[.*+?^${}()|[\]\\]/g
 function escapeRegExp(text) {
@@ -153,8 +176,10 @@ function withGlossary(breaks, glossary) {
   return entry ? (breaks ? entry.record : entry.prose) : pipeline(breaks)
 }
 
-function engineFor(breaks, glossary) {
-  return glossary && glossary.length > 0 ? withGlossary(breaks, glossary) : pipeline(breaks)
+// `blankLines` is for a page's own text, which has no glossary; a glossary
+// wins over it.
+function engineFor(breaks, glossary, blankLines = false) {
+  return glossary && glossary.length > 0 ? withGlossary(breaks, glossary) : pipeline(breaks, blankLines)
 }
 
 // The same key as the render pipelines, for the same reason: a glossary list
@@ -195,9 +220,12 @@ export function glossaryIdsIn(text, glossary) {
   return [...found]
 }
 
-/** A text as one or more paragraphs. `glossary`: `[{ id, spelling }]` to highlight. */
-export function renderBlock(text, { breaks = false, glossary } = {}) {
-  return engineFor(breaks, glossary).parse(String(text ?? ''))
+/**
+ * A text as one or more paragraphs. `glossary`: `[{ id, spelling }]` to
+ * highlight. `blankLines`: each blank line between two blocks a `<br>`.
+ */
+export function renderBlock(text, { breaks = false, glossary, blankLines = false } = {}) {
+  return engineFor(breaks, glossary, blankLines).parse(String(text ?? ''))
 }
 
 /** A text without the surrounding paragraph, for a heading or a table cell. */

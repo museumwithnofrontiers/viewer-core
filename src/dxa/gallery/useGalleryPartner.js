@@ -59,7 +59,7 @@ export function useGalleryPartner(data, collection, config = {}) {
   // results and the timeline gallery use. `scope` is built per-page in the
   // site's own PartnerObjects.vue, over the route's own id —
   // `CatalogueResultsView` takes no record id of its own, unlike
-  // `RecordView`.
+  // `RecordView`. Legacy's page (PartnerObjects.vue) printed no count.
   const partnerObjects = {
     entity: 'items',
     sort: { undated: 'first' },
@@ -70,7 +70,7 @@ export function useGalleryPartner(data, collection, config = {}) {
     empty: 'gallery.partner.noObjects',
     pagination: { jump: true },
     record: (item, { t }) => tile(item, t),
-    summary: ({ pageInfo, t }) => [{ count: pageInfo.total, value: t('partner.item.objectsInSite') }],
+    summary: () => [],
   }
 
   return { partnerList, partnerSheet, partnerObjects }

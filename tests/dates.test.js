@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { centuryPresets, dateRange, eraLabel, inDateRange, roundOutward, yearBuckets, yearBucketsFromRange } from '../src/index.js'
+import { centuryPresets, dateRange, eraLabel, inDateRange, roundOutward, withEraWords, yearBuckets, yearBucketsFromRange } from '../src/index.js'
+import { GALLERY_ERA_WORDS } from '../src/dxa/index.js'
 
 const t = (key) => ({ 'catalogue.era.bc': 'BC', 'catalogue.era.ad': 'AD', 'catalogue.era.before': 'Before', 'catalogue.era.after': 'After' })[key] ?? key
 
@@ -89,6 +90,15 @@ describe('eraLabel and roundOutward', () => {
     expect(eraLabel(-502, t)).toBe('502 BC')
     expect(eraLabel(0, t)).toBe('')
     expect(eraLabel(undefined, t)).toBe('')
+  })
+
+  it("reads a family's own era words through withEraWords, every other entry as before", () => {
+    const words = { 'gallery.era.ad': 'A.D.', 'gallery.era.bc': 'B.C.' }
+    const galleryT = withEraWords((key) => words[key] ?? t(key), GALLERY_ERA_WORDS)
+    expect(eraLabel(1193, galleryT)).toBe('1193 A.D.')
+    expect(eraLabel(-502, galleryT)).toBe('502 B.C.')
+    expect(yearBucketsFromRange(1100, 1350, galleryT).map((o) => o.label)).toEqual(['1100 A.D.', '1200 A.D.', '1300 A.D.', 'After 1300 A.D.'])
+    expect(withEraWords(t, null)).toBe(t)
   })
 
   it('rounds outward to the century, one date standing for both', () => {

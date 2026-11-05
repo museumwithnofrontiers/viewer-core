@@ -1,3 +1,37 @@
+## 2.16.0 (2026-11-05)
+
+Part of the galleries' text pages (museumwithnofrontiers/inventory-app#2423).
+
+### Added
+
+- **`renderBlock(text, { blankLines: true })`, and `I18nText`'s
+  `blank-lines`**, keep the number of blank lines between two blocks: each
+  one is a `<br>`. Legacy's text pages were HTML, and a gallery's Credits put
+  two blank lines where it put one elsewhere; Markdown reads any run of blank
+  lines as one paragraph break. Off by default: every other text renders as
+  before.
+- **`withEraWords(t, words)`** reads a family's own era words in place of
+  `catalogue.era.*`; **`GALLERY_ERA_WORDS`** (`/dxa`) are the galleries':
+  "A.D." and "B.C." (`gallery.era.ad`, `gallery.era.bc`, viewer-i18n 6.6.0),
+  as legacy's galleries printed them where every other site prints "AD"
+  and "BC". The gallery timeline's year lists and summary and the item
+  sheet's timeline read them, and the timeline spec carries them as
+  `eraWords` for the views that print years.
+- **`sortChronological`'s `tiebreak`**: the order of two records of the same
+  year. The galleries' is `legacyOrder` (`useGalleryCollection`): dxa-api's
+  `ORDER BY startDate, countryName, partnerName`, then the legacy key, its
+  numbers as numbers, which is the order legacy's table returned them in.
+- **`GALLERY_PAGE_SIZE`** (`/dxa`, 20): dxa-api's own page size, which
+  legacy's galleries showed. The gallery specs keep `PAGE_SIZE` (9);
+  viewer-layout 3.60.0's gallery pages apply twenty and `legacyOrder`, with
+  the smoke suite that counts them.
+- **A gallery tile carries its card's lines one by one** (`date`, `partner`,
+  `place`, `project`) beside `meta`, for legacy's ObjectGrid card.
+
+### Changed
+
+- **A partner's objects page** prints no count, as legacy's did not.
+
 ## 2.15.0 (2026-11-02)
 
 Part of the Baroque Art search (museumwithnofrontiers/inventory-app#2418).
