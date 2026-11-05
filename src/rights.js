@@ -30,7 +30,13 @@ export function useSiteRights() {
   }
 }
 
-const TRAILING_SLASHES = /\/+$/
+// The declared origin without the trailing slashes a site may have put on it
+// (a loop, not a regular expression: an origin is the site's own input).
+function siteOrigin() {
+  let origin = String(useSiteConfig().site?.origin ?? '')
+  while (origin.endsWith('/')) origin = origin.slice(0, -1)
+  return origin
+}
 
 /**
  * The address of `route` on this deployment: the declared `site.origin`
@@ -43,7 +49,7 @@ const TRAILING_SLASHES = /\/+$/
  * same way a `<router-link>` would.
  */
 export function sourceUrl(route) {
-  const origin = String(useSiteConfig().site?.origin ?? '').replace(TRAILING_SLASHES, '')
+  const origin = siteOrigin()
   if (!origin) return null
   const fullPath =
     typeof route === 'object' && route !== null && typeof route.fullPath === 'string'
@@ -59,7 +65,7 @@ export function sourceUrl(route) {
  * segment swapped. Null when the site declares no origin, or no slug is given.
  */
 export function siblingSiteUrl(slug, path) {
-  const origin = String(useSiteConfig().site?.origin ?? '').replace(TRAILING_SLASHES, '')
+  const origin = siteOrigin()
   if (!origin || !slug) return null
   const parent = origin.slice(0, origin.lastIndexOf('/'))
   return `${parent}/${slug}/#${path}`
