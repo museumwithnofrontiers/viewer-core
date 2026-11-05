@@ -18,6 +18,7 @@ import { resolveRecordLanguage } from './composables/useRecordLanguage.js'
 //     site_url: 'https://…' | null,
 //     related_database_url: 'https://…' | null,
 //     artistic_introduction_url: 'https://…' | null,
+//     home_site: '<site slug>' | null,          // the site home to its records
 //   }
 //
 // A data package built before this phase simply has no `projects` key at
@@ -49,10 +50,12 @@ export function projectLabel(manifest, projectId, lang) {
 }
 
 /**
- * The three URLs `manifest.projects[projectId]` carries. `null` for the
- * whole result (not per field) when the package predates the section or
- * does not carry `projectId`; each field is `null` on its own when the
- * project simply has no value for it (import time never invents one).
+ * The three URLs `manifest.projects[projectId]` carries, and `homeSite`, the
+ * slug of the site home to the project's records (`siblingSiteUrl` turns it
+ * into an address). `null` for the whole result (not per field) when the
+ * package predates the section or does not carry `projectId`; each field is
+ * `null` on its own when the project simply has no value for it (import
+ * time never invents one).
  */
 export function projectLinks(manifest, projectId) {
   const entry = projectEntry(manifest, projectId)
@@ -61,6 +64,7 @@ export function projectLinks(manifest, projectId) {
     siteUrl: entry.site_url ?? null,
     relatedDatabaseUrl: entry.related_database_url ?? null,
     artisticIntroductionUrl: entry.artistic_introduction_url ?? null,
+    homeSite: entry.home_site ?? null,
   }
 }
 
