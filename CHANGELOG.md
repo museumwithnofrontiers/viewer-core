@@ -1,3 +1,17 @@
+## 2.17.0 (2026-11-05)
+
+Part of the galleries' item sheet (museumwithnofrontiers/inventory-app#2423).
+
+### Added
+
+- **`projectLinks(manifest, id).homeSite`** (and `useProjects().links`): the
+  slug of the site home to the project's records, from the data package's
+  `manifest.projects[id].home_site` (inventory-app#2477); `null` when the
+  package has none.
+- **`siblingSiteUrl(slug, path)`**: the address of a router path on the
+  sibling site `slug`, every site being deployed one path segment under a
+  common parent: this site's `site.origin` with its last segment swapped.
+  Null without an origin or a slug.
 ## 2.16.0 (2026-11-05)
 
 Part of the galleries' text pages (museumwithnofrontiers/inventory-app#2423).
