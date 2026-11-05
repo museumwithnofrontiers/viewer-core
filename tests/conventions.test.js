@@ -69,15 +69,17 @@ describe('projectLinks', () => {
         site_url: 'https://a.example.org',
         related_database_url: 'https://a.example.org/database.php',
         artistic_introduction_url: null,
+        home_site: 'a-site',
       },
     },
   }
 
-  it('reads the three URLs the entry carries', () => {
+  it('reads the three URLs the entry carries, and its home site', () => {
     expect(projectLinks(manifest, 'proj-a')).toEqual({
       siteUrl: 'https://a.example.org',
       relatedDatabaseUrl: 'https://a.example.org/database.php',
       artisticIntroductionUrl: null,
+      homeSite: 'a-site',
     })
   })
 

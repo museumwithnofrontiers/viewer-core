@@ -3,7 +3,7 @@ import { mount } from '@vue/test-utils'
 import { createMemoryHistory, createRouter } from 'vue-router'
 import { mwnfLinks } from '../src/conventions.js'
 import { setSiteConfig } from '../src/siteConfig.js'
-import { sourceUrl, useSiteRights } from '../src/rights.js'
+import { siblingSiteUrl, sourceUrl, useSiteRights } from '../src/rights.js'
 
 // useSiteRights reads the one manifest the whole suite shares through the
 // @inventory-data alias, which carries no `rights` block (it predates
@@ -85,5 +85,19 @@ describe('sourceUrl', () => {
     let result
     mount({ setup() { result = sourceUrl('/item/o2'); return () => null } }, { global: { plugins: [router] } })
     expect(result).toBe('https://example.org/site/#/item/o2')
+  })
+})
+
+describe('siblingSiteUrl', () => {
+  it("swaps the origin's last segment for the sibling's slug", () => {
+    setSiteConfig({ site: { origin: 'https://example.org/ceramics/' } })
+    expect(siblingSiteUrl('islamicart', '/item/o1')).toBe('https://example.org/islamicart/#/item/o1')
+  })
+
+  it('is null with no origin or no slug', () => {
+    setSiteConfig({})
+    expect(siblingSiteUrl('islamicart', '/item/o1')).toBeNull()
+    setSiteConfig({ site: { origin: 'https://example.org/ceramics' } })
+    expect(siblingSiteUrl(null, '/item/o1')).toBeNull()
   })
 })
