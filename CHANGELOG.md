@@ -10,6 +10,13 @@ Part of the galleries' text pages (museumwithnofrontiers/inventory-app#2423).
   two blank lines where it put one elsewhere; Markdown reads any run of blank
   lines as one paragraph break. Off by default: every other text renders as
   before.
+- **`withEraWords(t, words)`** reads a family's own era words in place of
+  `catalogue.era.*`; **`GALLERY_ERA_WORDS`** (`/dxa`) are the galleries':
+  "A.D." and "B.C." (`gallery.era.ad`, `gallery.era.bc`, viewer-i18n 6.6.0),
+  as legacy's galleries printed them where every other site prints "AD"
+  and "BC". The gallery timeline's year lists and summary and the item
+  sheet's timeline read them, and the timeline spec carries them as
+  `eraWords` for the views that print years.
 
 ## 2.15.0 (2026-11-02)
 

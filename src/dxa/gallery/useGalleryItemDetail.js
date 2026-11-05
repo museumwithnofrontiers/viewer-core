@@ -1,4 +1,5 @@
-import { eraLabel, roundOutward } from '../../catalogue/dates.js'
+import { eraLabel, roundOutward, withEraWords } from '../../catalogue/dates.js'
+import { GALLERY_ERA_WORDS } from './eraWords.js'
 import { useSiteConfig } from '../../siteConfig.js'
 import { useGallerySheet } from './useGallerySheet.js'
 
@@ -72,7 +73,7 @@ export function useGalleryItemDetail(data, timeline) {
       },
       events: (country) => findEvents({ country, begin: from, end: to }),
       range: [from, to],
-      era: (year) => eraLabel(year, ctx.t),
+      era: (year) => eraLabel(year, withEraWords(ctx.t, GALLERY_ERA_WORDS)),
       searchTo: (country, [begin, end]) => ({ name: 'timeline-results', query: { country, begin, end } }),
     }
   }

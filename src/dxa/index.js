@@ -24,6 +24,7 @@ export { DATE_MODE, FACET_CATEGORIES, FACET_LABEL_KEYS, PAGE_SIZE, useFacetLabel
 export { useGalleryData } from './gallery/useGalleryData.js'
 export { useGalleryCollection } from './gallery/useGalleryCollection.js'
 export { useGalleryTimeline } from './gallery/useGalleryTimeline.js'
+export { GALLERY_ERA_WORDS } from './gallery/eraWords.js'
 export { useGalleryPartner } from './gallery/useGalleryPartner.js'
 export { useGallerySheet } from './gallery/useGallerySheet.js'
 export { useGalleryItemDetail } from './gallery/useGalleryItemDetail.js'
