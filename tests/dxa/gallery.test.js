@@ -117,9 +117,9 @@ describe('useGalleryCollection', () => {
     expect(collection.FACETS.country.label('eg')).toBe('Egypt')
   })
 
-  it('the results spec declares the containment date rule and twenty-a-page paging, as legacy', () => {
+  it('the results spec declares the containment date rule and nine-a-page paging', () => {
     expect(collection.collectionResults.dates).toEqual({ mode: 'contain', begin: 'from', end: 'to' })
-    expect(collection.collectionResults.pageSize).toBe(20)
+    expect(collection.collectionResults.pageSize).toBe(9)
   })
 })
 
@@ -148,8 +148,8 @@ describe('useGalleryTimeline', () => {
     expect(timeline.timelineResults.gallery.route).toBe('timeline-gallery')
   })
 
-  it('the gallery-page spec scopes on the same country/period join, twenty a page', () => {
-    expect(timeline.timelineGallery.pageSize).toBe(20)
+  it('the gallery-page spec scopes on the same country/period join, nine a page', () => {
+    expect(timeline.timelineGallery.pageSize).toBe(9)
     expect(timeline.timelineGallery.scope(items.value[0], { country: 'eg' })).toBe(true)
     expect(timeline.timelineGallery.scope(items.value[1], { country: 'eg' })).toBe(false)
   })
@@ -172,8 +172,8 @@ describe('useGalleryPartner', () => {
     expect(partner.partnerSheet.related).toBe(false)
   })
 
-  it('the objects-page spec reuses the collection tile, twenty a page', () => {
-    expect(partner.partnerObjects.pageSize).toBe(20)
+  it('the objects-page spec reuses the collection tile, nine a page', () => {
+    expect(partner.partnerObjects.pageSize).toBe(9)
     expect(partner.partnerObjects.record(items.value[0], { t }).id).toBe('item-1')
   })
 })

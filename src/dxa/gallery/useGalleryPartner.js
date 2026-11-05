@@ -1,4 +1,4 @@
-import { GALLERY_PAGE_SIZE } from '../shared.js'
+import { PAGE_SIZE } from '../shared.js'
 
 // The partner pages, as specs: what viewer-layout's `PartnerListView`,
 // `RecordView` and `CatalogueResultsView` render on `/partners`,
@@ -62,8 +62,8 @@ export function useGalleryPartner(data, collection, config = {}) {
   // `RecordView`. Legacy's page (PartnerObjects.vue) printed no count.
   const partnerObjects = {
     entity: 'items',
-    sort: { undated: 'first', tiebreak: collection.legacyOrder },
-    pageSize: GALLERY_PAGE_SIZE,
+    sort: { undated: 'first' },
+    pageSize: PAGE_SIZE,
     variant: 'grid',
     recordRoute: 'item',
     actionLabel: 'catalogue.results.seeDatabaseEntry',

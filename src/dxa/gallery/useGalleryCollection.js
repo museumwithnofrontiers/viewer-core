@@ -1,5 +1,5 @@
 import { projectLabel } from '../../conventions.js'
-import { DATE_MODE, FACET_CATEGORIES, GALLERY_PAGE_SIZE } from '../shared.js'
+import { DATE_MODE, FACET_CATEGORIES, PAGE_SIZE } from '../shared.js'
 
 export { DATE_MODE, FACET_CATEGORIES, FACET_LABEL_KEYS, GALLERY_PAGE_SIZE, PAGE_SIZE, useFacetLabels } from '../shared.js'
 
@@ -121,7 +121,8 @@ export function useGalleryCollection(data, config = {}) {
     }
   }
 
-  // Legacy's order among records of one year (the specs' `sort.tiebreak`):
+  // Legacy's order among records of one year (a gallery page's
+  // `sort.tiebreak`, viewer-layout's dxa/gallery pages):
   // dxa-api's `ORDER BY startDate, countryName, partnerName`, then MySQL's
   // own order, which is the table's key: the record's legacy key, its
   // numbers compared as numbers (inventory-app#2423).
@@ -164,8 +165,8 @@ export function useGalleryCollection(data, config = {}) {
     facetScope: 'matching',
     filterMode: 'immediate',
     dates: { mode: DATE_MODE, begin: 'from', end: 'to' },
-    sort: { undated: 'first', tiebreak: legacyOrder },
-    pageSize: GALLERY_PAGE_SIZE,
+    sort: { undated: 'first' },
+    pageSize: PAGE_SIZE,
     variant: 'grid',
     recordRoute: 'item',
     actionLabel: 'catalogue.results.seeDatabaseEntry',
