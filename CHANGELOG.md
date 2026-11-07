@@ -1,3 +1,24 @@
+## 2.18.0 (2026-11-07)
+
+Links to the new sites, not to legacy (museumwithnofrontiers/inventory-app#2482).
+
+### Added
+
+- **`toNewSite(href)`**: a legacy MWNF address of a site that has a new one, on the new site.
+  - From `LEGACY_SITES`, the estate's legacy addresses: a gallery, Explore, the galleries hub and the three products by host, legacy's own domains included; an exhibition by its host and segment; a mini-site by its page.
+  - A gallery, Explore and the hub keep their path, which their legacy redirects already land.
+  - An exhibition drops its own segment and keeps the language as `?lang=`.
+  - A mini-site opens on its home.
+  - A product's page goes to its new route (`database.php` → `/database`, `pm_partner_list.php?type=museum` → `/partners/results?type=museum`, `about_team.php` → `/about/team`, …). A page with no counterpart stays on legacy.
+  - Every other address is returned as it is, and so is every address on a site that declares no `site.origin`.
+- **`watchNewSiteLinks(root)`**: keeps every anchor under `root` on the new sites, as it is drawn or re-addressed. `createViewer` starts it on `document.body` when the app mounts, so components, texts and a site's own markup all follow it.
+- **`withScheme(address)`**: a host as legacy stored it, with its scheme.
+
+### Changed
+
+- **Every Markdown link** to such an address goes to the new site. The texts stay as imported.
+- **`siblingUrl()`** (galleries and exhibitions) gives a sibling's new site, and a bare host its scheme.
+
 ## 2.17.0 (2026-11-05)
 
 Part of the galleries' item sheet (museumwithnofrontiers/inventory-app#2423).

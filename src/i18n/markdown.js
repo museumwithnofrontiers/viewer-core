@@ -1,4 +1,5 @@
 import { Marked } from 'marked'
+import { toNewSite } from '../legacySites.js'
 
 // One Markdown pipeline for every text on every website, configured here and
 // nowhere else. Its own instance rather than the shared `marked` singleton, so
@@ -56,10 +57,18 @@ const noCode = {
 // so a single newline means nothing. A record's field arrives from a database
 // where a newline was typed to be a line break, and dropping it runs the lines
 // together.
+// A text's link to a legacy MWNF site that has a new one goes to the new site
+// (inventory-app#2482); the text stays as it was written.
+const newSiteLinks = {
+  walkTokens(token) {
+    if (token.type === 'link' && token.href) token.href = toNewSite(token.href)
+  },
+}
+
 const prose = new Marked({ async: false, gfm: true, breaks: false })
 const record = new Marked({ async: false, gfm: true, breaks: true })
-prose.use(escaping, noCode)
-record.use(escaping, noCode)
+prose.use(escaping, noCode, newSiteLinks)
+record.use(escaping, noCode, newSiteLinks)
 
 // `blankLines` keeps the number of blank lines between two blocks. Legacy's
 // text pages were HTML, a blank line a `<br>`, and some put two blank lines
@@ -78,8 +87,8 @@ const blankLineSpacing = {
 }
 const proseLines = new Marked({ async: false, gfm: true, breaks: false })
 const recordLines = new Marked({ async: false, gfm: true, breaks: true })
-proseLines.use(escaping, noCode, blankLineSpacing)
-recordLines.use(escaping, noCode, blankLineSpacing)
+proseLines.use(escaping, noCode, blankLineSpacing, newSiteLinks)
+recordLines.use(escaping, noCode, blankLineSpacing, newSiteLinks)
 
 const pipeline = (breaks, blankLines = false) => {
   if (blankLines) return breaks ? recordLines : proseLines

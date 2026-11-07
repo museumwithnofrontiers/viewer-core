@@ -4,6 +4,7 @@ import { useCatalogueData } from '../../composables/useCatalogueData.js'
 import { useDataPackage } from '../../composables/useDataPackage.js'
 import { itemFromUidPath as legacyItemFromUidPath, partnerFromKey as legacyPartnerFromKey } from '../../legacy/index.js'
 import { useLegacyCountryCodes } from '../countryCodes.js'
+import { toNewSite, withScheme } from '../../legacySites.js'
 
 // The data layer every DXA gallery site (carpets, amulets, …) wrote for
 // itself: the entities a gallery reads, the lookup maps over them, its
@@ -124,8 +125,9 @@ export function useGalleryData(config = {}) {
     (gallery.value?.sibling_galleries ?? []).filter((g) => !g.hidden),
   )
 
+  // A sibling with a new site links to it (inventory-app#2482).
   function siblingUrl(sibling) {
-    return sibling?.legacy_host || null
+    return sibling?.legacy_host ? toNewSite(withScheme(sibling.legacy_host)) : null
   }
 
   /** Four at random, reshuffled per visit. */
