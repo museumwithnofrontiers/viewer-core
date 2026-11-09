@@ -1,6 +1,6 @@
 import { beforeAll, describe, expect, it } from 'vitest'
 import {
-  effectiveYearTo, eventDateLabel, loadEntities, overlapsRange, useTimelineEvents,
+  effectiveYearTo, eventDateLabel, loadEntities, overlapsRange, touchesRange, useTimelineEvents,
 } from '../src/index.js'
 import translations from './fixtures/data-package/translations/timeline_events.en.json'
 
@@ -54,6 +54,27 @@ describe('overlapsRange', () => {
   it('an undated event never matches a bounded search', () => {
     expect(overlapsRange({ year_from: null }, 1, 2000)).toBe(false)
     expect(overlapsRange({}, 1, null)).toBe(false)
+  })
+})
+
+describe('touchesRange', () => {
+  // Pinned against legacy's `/thg/timeline?na=&nz=` on The Hijaz Railway,
+  // whose chronology has 1516–1916, 1918–1920 and 1931–1931.
+  it("is inclusive at both ends, as an exhibition's own chronology answered", () => {
+    expect(touchesRange({ year_from: 1918, year_to: 1920 }, 1800, 1918)).toBe(true)
+    expect(touchesRange({ year_from: 1918, year_to: 1920 }, 1920, 1970)).toBe(true)
+    expect(touchesRange({ year_from: 1516, year_to: 1916 }, 1916, 1917)).toBe(true)
+    expect(touchesRange({ year_from: 1931, year_to: 1931 }, 1931, 1931)).toBe(true)
+    expect(touchesRange({ year_from: 1516, year_to: 1916 }, 1917, 1917)).toBe(false)
+    expect(touchesRange({ year_from: 1918, year_to: 1920 }, 1917, 1917)).toBe(false)
+  })
+
+  it('takes an event with no known end as its start year, and keeps the bounds optional', () => {
+    expect(touchesRange({ year_from: 1400, year_to: 0 }, 1400, 1450)).toBe(true)
+    expect(touchesRange({ year_from: 1400 }, 1401, 1450)).toBe(false)
+    expect(touchesRange({ year_from: 1400 }, null, 1400)).toBe(true)
+    expect(touchesRange({ year_from: null }, null, null)).toBe(true)
+    expect(touchesRange({ year_from: null }, 1, 2000)).toBe(false)
   })
 })
 

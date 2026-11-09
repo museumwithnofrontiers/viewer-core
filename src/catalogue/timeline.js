@@ -55,6 +55,20 @@ export function overlapsRange(event, begin, end) {
 }
 
 /**
+ * Whether `event` falls in `[begin, end]` by an exhibition's own chronology,
+ * legacy's `/thg/timeline?na=&nz=`: unlike the country rule above, its bounds
+ * are inclusive, so an event ending the year a search begins, or beginning
+ * the year it ends, is in it. An event with no known end is its start year.
+ */
+export function touchesRange(event, begin, end) {
+  const yf = event?.year_from
+  if (begin == null && end == null) return true
+  if (!Number.isFinite(yf)) return false
+  const yt = effectiveYearTo(event) ?? yf
+  return (begin == null || yt >= begin) && (end == null || yf <= end)
+}
+
+/**
  * The label under an event, trying the three rules the sites share in the
  * order the data disambiguates them: a curated description pair
  * (`date_from_description`/`date_to_description`, for an event whose date
@@ -206,7 +220,7 @@ export function useTimelineEvents({
         // renders no picker for this scope.
         if (scope !== 'local' && countryId && event.country_id !== countryId) return false
         if (collection !== undefined && !matchesCollection(event, collection)) return false
-        return overlapsRange(event, from, to)
+        return scope === 'local' ? touchesRange(event, from, to) : overlapsRange(event, from, to)
       })
       .map((event) => ({ ...event, text: tr ? tr(event.id) : {} }))
       .sort((a, b) => {

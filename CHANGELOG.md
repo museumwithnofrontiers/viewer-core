@@ -1,3 +1,17 @@
+## 2.20.0 (2026-11-09)
+
+An exhibition's partners and "Timeline for this item" as the updated Hijaz Railway demo shows them (museumwithnofrontiers/inventory-app#2491).
+
+### Changed
+
+- **"Timeline for this item"** looks for events in the item's own years and shows them, as legacy's sheet did; only "search this period" rounds them out to centuries. An item dated 1985–2026 no longer draws the link from an event of the 20th century outside those years.
+- **An exhibition's own chronology** (`useTimelineEvents({ scope: 'local' })`) finds events by legacy's `/thg/timeline` rule, inclusive at both ends: an event ending the year a search begins, or beginning the year it ends, is in it. The country chronology keeps `class.hcr.inc.php`'s strict rule.
+- **An exhibition partner with no text in any language** (an empty `languages`) is hidden, as `hidden_partner_ids` hides one: legacy lists no such partner, nor serves its page. A partner row with no `languages` field stays.
+
+### Added
+
+- **`touchesRange(event, begin, end)`**: the inclusive rule above.
+
 ## 2.19.0 (2026-11-09)
 
 An exhibition's partners and item sheet as legacy's demo shows them since MWNF-621 (museumwithnofrontiers/inventory-app#2491). Its monument sheet, period of activity and timeline link are the same on legacy's live exhibitions.

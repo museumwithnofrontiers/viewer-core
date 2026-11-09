@@ -114,11 +114,13 @@ export function useExhibitionItemDetail(data, timeline) {
       // an exhibition with a chronology of its own and both flags off (The
       // Hijaz Railway); it is withheld when the exhibition has no chronology
       // in force, when the item has no date to anchor a range on, or when no
-      // event falls in it.
+      // event falls in it. Legacy asked for the item's own years, and showed
+      // them; only its "search this period" link rounded them out to
+      // centuries.
       timeline: (record, ctx) => {
         if (!hasTimeline.value && !usesLocalTimeline?.value) return null
-        const range = roundOutward(record.start_date, record.end_date)
-        if (range[0] == null) return null
+        if (!Number.isFinite(record.start_date)) return null
+        const range = [record.start_date, Number.isFinite(record.end_date) ? record.end_date : record.start_date]
         if (findEvents({ begin: range[0], end: range[1] }).length === 0) return null
         return {
           heading: 'core.section.timeline',
@@ -127,7 +129,7 @@ export function useExhibitionItemDetail(data, timeline) {
           events: (country) => findEvents({ country, begin: range[0], end: range[1] }),
           range,
           era: (year) => eraLabel(year, ctx.t),
-          searchTo: periodSearch,
+          searchTo: (country) => periodSearch(country, roundOutward(record.start_date, record.end_date)),
         }
       },
     },

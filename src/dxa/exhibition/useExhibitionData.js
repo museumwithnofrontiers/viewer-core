@@ -55,8 +55,12 @@ export function useExhibitionData(config = {}) {
   // because the item sheet's holder line is the one surface that needs the
   // opposite of `visible` — the museum keeps its name and loses only the
   // link, because it has no page to link to.
+  //
+  // So is a partner the package says has no text in any language: it has no
+  // name, and legacy lists no such partner, nor serves its page.
   const hiddenPartnerIds = computed(() => new Set(exhibition.value?.hidden_partner_ids ?? []))
   function isHiddenPartner(partner) {
+    if (Array.isArray(partner?.languages) && partner.languages.length === 0) return true
     return hiddenPartnerIds.value.has(partner?.id)
   }
 
@@ -80,7 +84,8 @@ export function useExhibitionData(config = {}) {
       // descriptions. Hence the `!i.languages?.length ||` guard, which
       // reads like a redundant null-check and is not.
       items: (i) => !i.languages?.length || i.languages.includes(defaultLang),
-      partners: (p) => !hiddenPartnerIds.value.has(p.id),
+      // A partner is another case: see `isHiddenPartner` above.
+      partners: (p) => !isHiddenPartner(p),
     },
   })
 
