@@ -247,7 +247,8 @@ export function recordArtist(record, text) {
  *   comma before the place, as it did there. Nothing without an artist.
  * - `'line'` — the galleries' and exhibitions' `DatabaseItem.vue`
  *   (`returnArtistData`): on a line of its own under the artist,
- *   `1660, Chemnitz - 1736, Augsburg`.
+ *   `1660, Chemnitz - 1736, Augsburg`, then the period of activity
+ *   (`period_activity`) on a line of its own.
  *
  * Islamic Art's sheet printed the artist alone. '' when there is nothing
  * to print.
@@ -261,7 +262,7 @@ export function artistLine(artist, text, { style = 'bracketed' } = {}) {
   if (style === 'line') {
     const birth = [born, bornAt].filter(Boolean).join(', ')
     const death = [died, diedAt].filter(Boolean).join(', ')
-    return [name, [birth, death].filter(Boolean).join(' - ')].filter(Boolean).join('  \n')
+    return [name, [birth, death].filter(Boolean).join(' - '), lifePart(text?.period_activity)].filter(Boolean).join('  \n')
   }
   if (!name) return ''
   if (!(born || bornAt || died || diedAt)) return name

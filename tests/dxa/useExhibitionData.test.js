@@ -59,13 +59,22 @@ describe('useExhibitionData', () => {
 
   it('routes a museum and an institution partner differently', () => {
     const data = useExhibitionData()
-    expect(data.isInstitution({ type: 'institution' })).toBe(true)
-    expect(data.isInstitution({ type: 'museum' })).toBe(false)
-    expect(data.partnerRoute({ id: 'p1', type: 'institution' })).toEqual({ name: 'institution', params: { id: 'p1' } })
+    const institution = { id: 'p1', type: 'institution', backward_compatibility: 'mwnf3:institutions:Mon01:sy' }
+    expect(data.isInstitution(institution)).toBe(true)
+    expect(data.isInstitution({ type: 'museum', backward_compatibility: 'mwnf3:museums:Mus01:eg' })).toBe(false)
+    expect(data.partnerRoute(institution)).toEqual({ name: 'institution', params: { id: 'p1' } })
     expect(data.partnerRoute({ id: 'p1', type: 'museum' })).toEqual({ name: 'partner', params: { id: 'p1' } })
-    expect(data.partnerObjectsRoute({ id: 'p1', type: 'institution' }, 2)).toEqual({
+    expect(data.partnerObjectsRoute(institution, 2)).toEqual({
       name: 'institution-monuments', params: { id: 'p1' }, query: { page: 2 },
     })
+  })
+
+  it('opens a Sharing History partner as a partner, though the package types it an institution', () => {
+    const data = useExhibitionData()
+    const partner = { id: 'p2', type: 'institution', backward_compatibility: 'mwnf3_sharing_history:sh_partners:lb_01' }
+    expect(data.isInstitution(partner)).toBe(false)
+    expect(data.partnerRoute(partner)).toEqual({ name: 'partner', params: { id: 'p2' } })
+    expect(data.partnerObjectsRoute(partner)).toEqual({ name: 'partner-objects', params: { id: 'p2' }, query: {} })
   })
 
   it('filters out a hidden sibling site', () => {

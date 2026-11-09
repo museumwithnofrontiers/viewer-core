@@ -9,6 +9,7 @@ import { useExhibitionPartner } from '../../src/dxa/exhibition/useExhibitionPart
 import { useExhibitionSheet } from '../../src/dxa/exhibition/useExhibitionSheet.js'
 import { useExhibitionItemDetail } from '../../src/dxa/exhibition/useExhibitionItemDetail.js'
 import { setSiteConfig } from '../../src/siteConfig.js'
+import { sheetRows } from '../../src/record/recordSheet.js'
 
 // The exhibition family's spec composables, over a small hand-built `data`
 // object shaped like the return value of `useExhibitionData()` — no data
@@ -78,6 +79,7 @@ function makeData(exhibitionOverrides = {}) {
     ...useLegacyCountryCodes({ countries, countryById, timelines, labelOf }),
     itemRoute: (item) => ({ name: 'item', params: { id: item.id } }),
     projectName: (item, lang = 'en') => manifest.projects[item?.project_id]?.name?.[lang] ?? null,
+    projectCode: (item) => (item?.project_id === 'proj-isl' ? 'ISL' : ''),
     isHiddenPartner: (partner) => partner?.id === 'hidden-1',
     isExploreRecord: (item) => !item?.project_id,
     dynastyById: computed(() => new Map()),
@@ -223,6 +225,38 @@ describe('useExhibitionSheet', () => {
     expect(field('artist').value({ record, text: { ...text, artist: 'Inconnu' } })).toBe('Inconnu  \n1520 - Cairo')
   })
 
+  it("prints a monument under legacy's monument labels, with its responsible institution and its history", () => {
+    const rows = (record, text) => sheetRows(sheet.itemSheet.fields, { record, text, language: 'en' })
+    const monument = { ...items.value[0], type: 'monument' }
+    const text = {
+      name: 'Beaufort Castle', alternate_name: "Qal'at al-Shaqif", dates: '12th century', type: 'Palatial architecture',
+      institution: 'Directorate General of Antiquities', architects: 'Unknown', history: 'Built after 1139.',
+      method_for_datation: 'Inscriptions', copyright: 'MWNF',
+    }
+    const shown = rows(monument, text)
+    expect(shown.map((r) => r.label)).toEqual([
+      'sheet.dxa.monumentName', 'sheet.dxa.monumentAlsoKnownAs', 'sheet.field.location', 'sheet.dxa.responsibleInstitution',
+      'sheet.field.dateOfMonument', 'sheet.dxa.monumentArtists', 'sheet.dxa.monumentType', 'sheet.field.inventoryNumber', 'sheet.field.history',
+      'sheet.field.monumentDatationMethod', 'sheet.dxa.monumentCopyrightInformation',
+    ])
+    expect(shown.find((r) => r.key === 'museum')).toBeUndefined()
+    // A Sharing History monument has the institution as its holder text.
+    expect(rows(monument, { holder: 'The Lebanese University' }).find((r) => r.key === 'institution').value).toBe('The Lebanese University')
+    // An Islamic Art monument names its architects as legacy did.
+    expect(rows({ ...monument, project_id: 'proj-isl' }, text).some((r) => r.label === 'sheet.field.architects')).toBe(true)
+  })
+
+  it("keeps an object's labels, its holding museum, and legacy's order of the method rows", () => {
+    const shown = sheetRows(sheet.itemSheet.fields, {
+      record: items.value[0], language: 'en',
+      text: { name: 'Bowl', dates: '10th century', type: 'Bowl', obtention: 'Purchase', method_for_datation: 'Style', copyright: 'MWNF' },
+    })
+    expect(shown.map((r) => r.label)).toEqual([
+      'sheet.field.name', 'sheet.field.location', 'sheet.field.holdingMuseum', 'sheet.field.date', 'sheet.field.type',
+      'sheet.field.inventoryNumber', 'sheet.field.datationMethod', 'sheet.field.obtentionMethod', 'sheet.field.copyrightInformation',
+    ])
+  })
+
   it('the citation carries a project line, unlike the gallery shape', () => {
     expect(sheet.itemSheet.citation.project(items.value[0], { language: 'en' })).toBe('The Use of Colours in Art')
     expect(sheet.itemSheet.citation.permalink).toBe(false)
@@ -282,7 +316,22 @@ describe('useExhibitionItemDetail', () => {
 
     // The exhibition's own chronology has no country control: the link
     // carries no country the results page would ignore.
-    const local = detailFor({ has_timeline: true, has_country_timeline: false }).related.timeline(items.value[0], ctx)
+    const local = detailFor({ has_timeline: true, has_country_timeline: false }).related.timeline(of1400, ctx)
     expect(local.searchTo('all', [900, 1000])).toEqual({ name: 'timeline-results', query: { begin: 900, end: 1000 } })
+  })
+
+  // A record of the 15th century, when the fixture's own chronology has its
+  // two events (1400; legacy's overlap rule is strict at both ends).
+  const of1400 = { ...items.value[0], id: 'item-1400', start_date: 1350, end_date: 1450 }
+
+  it('draws the popout from the exhibition\'s own chronology with both timeline flags off, as legacy\'s sheet did', () => {
+    const ctx = { t: (key) => key }
+    const timeline = detailFor({ has_timeline: false, has_country_timeline: false }).related.timeline(of1400, ctx)
+    expect(timeline.events('all').map((e) => e.id)).toEqual(['ev6', 'ev5'])
+  })
+
+  it('withholds the popout when no event falls in the item\'s period', () => {
+    const ctx = { t: (key) => key }
+    expect(detailFor({ has_timeline: true, has_country_timeline: false }).related.timeline(items.value[0], ctx)).toBeNull()
   })
 })

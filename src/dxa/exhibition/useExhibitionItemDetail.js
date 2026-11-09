@@ -26,13 +26,14 @@ import { useExhibitionSheet } from './useExhibitionSheet.js'
  * `data.isHiddenPartner`, `data.labelOf`, `data.partnerById`,
  * `data.partnerRoute`, `data.translations`, what `useExhibitionSheet` reads,
  * and `timeline.countryIdForCode`, `timeline.hasTimeline`,
- * `timeline.timelineEvents` (`countries`, `findEvents`), `timeline.timelineSpec`.
+ * `timeline.usesLocalTimeline`, `timeline.timelineEvents` (`countries`,
+ * `findEvents`), `timeline.timelineSpec`.
  */
 export function useExhibitionItemDetail(data, timeline) {
   const {
     dynastyById, isExploreRecord, isHiddenPartner, labelOf, partnerById, partnerRoute, translations,
   } = data
-  const { countryIdForCode, hasTimeline, timelineEvents, timelineSpec } = timeline
+  const { countryIdForCode, hasTimeline, usesLocalTimeline, timelineEvents, timelineSpec } = timeline
   const { countries: timelineCountries, findEvents } = timelineEvents
   const { itemSheet: platformSheet } = useExhibitionSheet(data)
 
@@ -107,13 +108,18 @@ export function useExhibitionItemDetail(data, timeline) {
         records: dynastiesWithHistory(record, language),
         tr: (d) => dynastyTr(d, language),
       }),
-      // Withheld when the exhibition reports no chronology, or the item has
-      // no date to anchor a range on: legacy then printed no "timeline"
-      // anywhere on the sheet.
+      // Legacy's sheet asked its own chronology (`/thg/timeline`) for the
+      // events of the item's period whatever the exhibition's timeline flags
+      // said, and drew the link when it answered any. So the link stays for
+      // an exhibition with a chronology of its own and both flags off (The
+      // Hijaz Railway); it is withheld when the exhibition has no chronology
+      // in force, when the item has no date to anchor a range on, or when no
+      // event falls in it.
       timeline: (record, ctx) => {
-        if (!hasTimeline.value) return null
+        if (!hasTimeline.value && !usesLocalTimeline?.value) return null
         const range = roundOutward(record.start_date, record.end_date)
         if (range[0] == null) return null
+        if (findEvents({ begin: range[0], end: range[1] }).length === 0) return null
         return {
           heading: 'core.section.timeline',
           countries: timelineCountries.value.map((c) => ({ value: c.value, label: c.label ?? ctx.t('timeline.form.allCountries') })),

@@ -33,12 +33,13 @@ import { artistLine, pictureCredits, picturesInLanguage, recordArtist } from '..
  * The exhibition's item-sheet spec, over its data layer's `data`.
  *
  * Reads `data.defaultLang`, `data.itemRoute`, `data.labelOf`,
- * `data.mdInline`, `data.mdStrip`, `data.partnerById`, `data.projectName`,
- * `data.tr`, `data.translations`. `config` carries nothing today.
+ * `data.mdInline`, `data.mdStrip`, `data.partnerById`, `data.projectCode`,
+ * `data.projectName`, `data.tr`, `data.translations`. `config` carries
+ * nothing today.
  */
 export function useExhibitionSheet(data, config = {}) {
   void config
-  const { defaultLang, itemRoute, labelOf, mdInline, mdStrip, partnerById, projectName, tr, translations } = data
+  const { defaultLang, itemRoute, labelOf, mdInline, mdStrip, partnerById, projectCode, projectName, tr, translations } = data
 
   const bothDescriptions = (c) => Boolean(c.text.description) && Boolean(c.text.short_description)
 
@@ -48,40 +49,60 @@ export function useExhibitionSheet(data, config = {}) {
       .filter(Boolean)
       .join(', ')
 
+  // Legacy's sheet printed a monument (a record with a `monumentId`) under
+  // its own labels and with the rows only a monument has; an object keeps
+  // the object's. Its architects row read "Architect(s) / Masterbuilder(s)"
+  // for a Discover Islamic Art or Explore record and "Artists" otherwise.
+  const monument = (c) => c.record.type === 'monument'
+  const object = (c) => !monument(c)
+  const islamicArt = (c) => ['ISL', 'EPM'].includes(projectCode(c.record))
+
   const fields = [
-    { key: 'name', label: 'sheet.field.name', value: 'name' },
-    { key: 'aka', label: 'sheet.field.alsoKnownAs', value: 'alternate_name' },
+    { key: 'name', label: 'sheet.field.name', value: 'name', when: object },
+    { key: 'monumentName', label: 'sheet.dxa.monumentName', value: 'name', when: monument },
+    { key: 'aka', label: 'sheet.field.alsoKnownAs', value: 'alternate_name', when: object },
+    { key: 'monumentAka', label: 'sheet.dxa.monumentAlsoKnownAs', value: 'alternate_name', when: monument },
     { key: 'location', label: 'sheet.field.location', value: (c) => [c.text.location, labelOf('countries', c.record.country_id)].filter(Boolean).join(', ') },
     // The holding museum, rendered by the wrapper's `museum` slot: the item's
     // holder text, then the partner it refers to (decision D3,
     // inventory-app#2015). The value is the partner's id when the package
     // carries the partner, otherwise the holder text, so the row stays for an
-    // item whose holder has no partner page.
-    { key: 'museum', label: 'sheet.field.holdingMuseum', value: (c) => (partnerById.value.get(c.record.partner_id) ? c.record.partner_id : (c.text.holder ?? '')), render: 'custom' },
+    // item whose holder has no partner page. A monument has no holding
+    // museum: legacy printed its responsible institution as written.
+    { key: 'museum', label: 'sheet.field.holdingMuseum', value: (c) => (partnerById.value.get(c.record.partner_id) ? c.record.partner_id : (c.text.holder ?? '')), render: 'custom', when: object },
+    { key: 'institution', label: 'sheet.dxa.responsibleInstitution', value: (c) => c.text.institution || c.text.holder, when: monument },
     { key: 'originalOwner', label: 'sheet.field.originalOwner', value: 'initial_owner' },
     { key: 'currentOwner', label: 'sheet.field.currentOwner', value: 'owner' },
-    { key: 'date', label: 'sheet.field.date', value: 'dates' },
+    { key: 'date', label: 'sheet.field.date', value: 'dates', when: object },
+    { key: 'monumentDate', label: 'sheet.field.dateOfMonument', value: 'dates', when: monument },
+    { key: 'architects', label: 'sheet.field.architects', value: 'architects', when: islamicArt },
+    { key: 'monumentArtists', label: 'sheet.dxa.monumentArtists', value: 'architects', when: (c) => !islamicArt(c) },
     { key: 'artist', label: 'sheet.field.artists', value: (c) => artistLine(recordArtist(c.record, c.text), c.text, { style: 'line' }) },
     { key: 'scribe', label: 'sheet.field.scribe', value: 'scriber' },
     { key: 'workshop', label: 'sheet.field.workshop', value: 'workshop' },
-    { key: 'type', label: 'sheet.field.type', value: 'type' },
+    { key: 'type', label: 'sheet.field.type', value: 'type', when: object },
+    { key: 'monumentType', label: 'sheet.dxa.monumentType', value: 'type', when: monument },
     { key: 'inventoryNumber', label: 'sheet.field.inventoryNumber', value: (c) => c.record.owner_reference },
     { key: 'materials', label: 'sheet.field.materials', value: (c) => c.text.materials, join: '; ' },
     { key: 'dimensions', label: 'sheet.field.dimensions', value: 'dimensions' },
     { key: 'dynasty', label: 'sheet.field.periodDynasty', value: (c) => c.text?.dynasty || dynastyNames(c) },
+    { key: 'patrons', label: 'sheet.field.patrons', value: 'patrons' },
     { key: 'production', label: 'sheet.field.placeOfProduction', value: 'place_of_production' },
     { key: 'provenance', label: 'sheet.field.provenance', value: 'provenance' },
     { key: 'binding', label: 'sheet.field.binding', value: 'binding_desc' },
+    { key: 'history', label: 'sheet.field.history', value: 'history', render: 'block' },
     { key: 'description', label: 'sheet.field.description', value: 'description', render: 'block' },
     // The only description there is, under the plain label; the toggled one
     // is the view's, folded after `description` when both exist.
     { key: 'shortDescription', label: 'sheet.field.description', value: 'short_description', render: 'block', when: (c) => !bothDescriptions(c) },
     { key: 'catalogue', label: 'sheet.field.catalogueLink', value: 'linkcatalogs', render: 'link' },
+    { key: 'datation', label: 'sheet.field.datationMethod', value: 'method_for_datation', when: object },
+    { key: 'monumentDatation', label: 'sheet.field.monumentDatationMethod', value: 'method_for_datation', when: monument },
     { key: 'obtention', label: 'sheet.field.obtentionMethod', value: 'obtention' },
-    { key: 'datation', label: 'sheet.field.datationMethod', value: 'method_for_datation' },
     { key: 'provenanceMethod', label: 'sheet.field.provenanceMethod', value: 'method_for_provenance' },
     { key: 'bibliography', label: 'sheet.field.bibliography', value: 'bibliography', render: 'block' },
-    { key: 'copyright', label: 'sheet.field.copyrightInformation', value: 'copyright' },
+    { key: 'copyright', label: 'sheet.field.copyrightInformation', value: 'copyright', when: object },
+    { key: 'monumentCopyright', label: 'sheet.dxa.monumentCopyrightInformation', value: 'copyright', when: monument },
   ]
 
   const itemSheet = {

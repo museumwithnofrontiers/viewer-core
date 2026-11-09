@@ -148,13 +148,14 @@ export function useExhibitionData(config = {}) {
     return { name: 'item', params: { id: item.id } }
   }
 
-  // Institutions (monument owners) and museums both live in partners.json —
-  // the package ships the union of legacy's /partners and /institutions
-  // because a static package has no endpoints to split them across. The
-  // viewer routes by `type`, which is what legacy's two page templates
-  // keyed off.
+  // Institutions (monument owners) and museums both live in partners.json.
+  // Legacy's /partners lists every owner once (MWNF-621), and its client
+  // opens the institution's pages only for a record of legacy's mwnf3
+  // institutions table: a Sharing History partner is a partner whatever it
+  // holds, though the package types one holding monuments as an institution.
+  const INSTITUTIONS_TABLE = 'mwnf3:institutions:'
   function isInstitution(partner) {
-    return partner?.type === 'institution'
+    return String(partner?.backward_compatibility ?? '').startsWith(INSTITUTIONS_TABLE)
   }
 
   function partnerRoute(partner) {
@@ -204,6 +205,13 @@ export function useExhibitionData(config = {}) {
     return projectLabel(manifest, item?.project_id, lang)
   }
 
+  /** The record's project by its legacy code (`ISL`, `EPM`), which legacy's
+   * sheet keyed some labels on; '' when the manifest does not carry it. */
+  function projectCode(item) {
+    const key = manifest?.projects?.[item?.project_id]?.backward_compatibility
+    return key ? String(key).split(':').pop().toUpperCase() : ''
+  }
+
   /** The exhibition's own per-language chrome text. */
   function exhibitionTitle(lang = defaultLang) {
     return exhibition.value?.titles?.[lang] ?? exhibition.value?.titles?.en ?? ''
@@ -247,7 +255,7 @@ export function useExhibitionData(config = {}) {
     chromeImage,
     partnerById, countryById, tagById, dynastyById, glossaryById, languageByCode,
     countryByCode, countryLabelFromCode, countryIdForCode, countryLabel,
-    itemRoute, isInstitution, partnerRoute, partnerObjectsRoute,
+    itemRoute, isInstitution, partnerRoute, partnerObjectsRoute, projectCode,
     isExploreRecord, projectName,
     exhibitionTitle, exhibitionSubtitle, exhibitionHeadline, bannerCaption,
     siblingSites, siblingUrl,
