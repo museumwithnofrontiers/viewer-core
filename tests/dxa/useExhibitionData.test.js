@@ -39,6 +39,16 @@ describe('useExhibitionData', () => {
     expect(data.partnerById.value.get('partner-de-plain')).toBeTruthy()
   })
 
+  it('lists no partner the package says has no text in any language, as legacy listed none (The Hijaz Railway lb/Mon91)', () => {
+    const data = useExhibitionData()
+    expect(data.partnerById.value.get('partner-lb-nameless')).toBeTruthy()
+    expect(data.visiblePartners.value.map((p) => p.id)).not.toContain('partner-lb-nameless')
+    expect(data.visiblePartnerById('partner-lb-nameless')).toBeNull()
+    expect(data.isHiddenPartner(data.partnerById.value.get('partner-lb-nameless'))).toBe(true)
+    // A partner whose package row carries no languages field at all stays.
+    expect(data.visiblePartnerById('partner-fr-owner')).toBeTruthy()
+  })
+
   it('reads the exhibition\'s own per-language chrome text, falling back to English', () => {
     const data = useExhibitionData()
     expect(data.exhibitionTitle()).toBe('Fixture Exhibition')

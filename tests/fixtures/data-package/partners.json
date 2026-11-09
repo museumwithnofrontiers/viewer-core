@@ -33,5 +33,14 @@
     "project_uuids": ["proj-b"],
     "item_count": 5,
     "featured": false
+  },
+  {
+    "id": "partner-lb-nameless",
+    "country_id": "country-lb",
+    "parent_id": null,
+    "project_uuids": ["proj-b"],
+    "item_count": 1,
+    "featured": false,
+    "languages": []
   }
 ]

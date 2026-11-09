@@ -34,7 +34,7 @@ export {
   combineExpansions, countryExpansion, glossaryExpansion, parseBooleanQuery, useKeywordIndex,
 } from './catalogue/keywordIndex.js'
 export {
-  effectiveYearTo, eventDateLabel, overlapsRange, useTimelineEvents,
+  effectiveYearTo, eventDateLabel, overlapsRange, touchesRange, useTimelineEvents,
 } from './catalogue/timeline.js'
 
 // The record page: the sheet engine and its derivations.

@@ -312,16 +312,26 @@ describe('useExhibitionItemDetail', () => {
     expect(country.defaultCountry()).toBe('c-eg')
     expect(country.countries[0]).toEqual({ value: 'all', label: 'timeline.form.allCountries' })
     expect(country.events('c-eg').map((e) => e.id)).toEqual(['ev1'])
-    expect(country.searchTo('c-eg', [900, 1000])).toEqual({ name: 'timeline-results', query: { country: 'c-eg', begin: 900, end: 1000 } })
+    // The popout shows the item's own years; only the link rounds them out
+    // to centuries, as legacy's did.
+    expect(country.range).toEqual([900, 950])
+    expect(country.searchTo('c-eg', country.range)).toEqual({ name: 'timeline-results', query: { country: 'c-eg', begin: 900, end: 1000 } })
 
     // The exhibition's own chronology has no country control: the link
     // carries no country the results page would ignore.
     const local = detailFor({ has_timeline: true, has_country_timeline: false }).related.timeline(of1400, ctx)
-    expect(local.searchTo('all', [900, 1000])).toEqual({ name: 'timeline-results', query: { begin: 900, end: 1000 } })
+    expect(local.searchTo('all', local.range)).toEqual({ name: 'timeline-results', query: { begin: 1300, end: 1500 } })
+  })
+
+  it("looks for events in the item's own years, not its centuries (The Hijaz Railway's Fairouz)", () => {
+    const ctx = { t: (key) => key }
+    // Egypt's ev1 (900–950) falls in the 10th century but not in 960–990.
+    const late = { ...items.value[0], id: 'item-late', start_date: 960, end_date: 990 }
+    expect(detailFor({ has_timeline: true, has_country_timeline: true }).related.timeline(late, ctx)).toBeNull()
   })
 
   // A record of the 15th century, when the fixture's own chronology has its
-  // two events (1400; legacy's overlap rule is strict at both ends).
+  // two events (1400).
   const of1400 = { ...items.value[0], id: 'item-1400', start_date: 1350, end_date: 1450 }
 
   it('draws the popout from the exhibition\'s own chronology with both timeline flags off, as legacy\'s sheet did', () => {
