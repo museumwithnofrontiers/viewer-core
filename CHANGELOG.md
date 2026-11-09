@@ -1,3 +1,17 @@
+## 2.19.0 (2026-11-09)
+
+An exhibition's partners and item sheet as legacy's demo shows them since MWNF-621 (museumwithnofrontiers/inventory-app#2491). Its monument sheet, period of activity and timeline link are the same on legacy's live exhibitions.
+
+### Changed
+
+- **An exhibition's partner routes**: only a record of legacy's mwnf3 institutions table opens the institution pages (`institution`, `institution-monuments`). A Sharing History partner opens the partner pages, whatever it holds, though the package types one holding monuments as an institution: legacy's `/partners` lists every owner once and its client keys the institution pages on that table.
+- **An exhibition's item sheet** prints a monument as legacy's: "Name of Monument", "Other name of the Monument", "Responsible institution" (the row's own text) instead of the holding museum, "Date of Monument", the architects ("Architect(s) / Masterbuilder(s)" for a Discover Islamic Art or Explore record, "Artists" otherwise), "Denomination / Type of Monument", "Patrons", "History", "How Monument was dated" and "Additional copyright information". The monument-only labels are `sheet.dxa.*` entries (`@museumwnf/viewer-i18n` 6.16.0). An object's "How date and origin were established" now comes before "How Object was obtained", as legacy's.
+- **"Timeline for this item"** follows legacy's sheet, which asked the exhibition's own chronology whatever its timeline flags said: it is drawn for an exhibition with a chronology of its own and both flags off, and withheld when no event falls in the item's period.
+
+### Added
+
+- **`artistLine(..., { style: 'line' })`** prints the artist's period of activity (`period_activity`) on a line of its own under the life data, as legacy's DXA sheets.
+- **An exhibition's `projectCode(item)`**: the record's project by its legacy code, from `manifest.projects[...].backward_compatibility`; '' for a package that does not carry it.
 ## 2.18.0 (2026-11-07)
 
 Links to the new sites, not to legacy (museumwithnofrontiers/inventory-app#2482).

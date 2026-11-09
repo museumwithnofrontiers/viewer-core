@@ -168,6 +168,13 @@ describe('artistLine', () => {
     expect(artistLine('A', { artist_birthdate: ' ' }, { style: 'line' })).toBe('A')
   })
 
+  it('adds the period of activity on a line of its own, as the DXA sheets did', () => {
+    const period = { period_activity: 'AH 1316 - 1318 / AD 1898-1940' }
+    expect(artistLine('A', period, { style: 'line' })).toBe('A  \nAH 1316 - 1318 / AD 1898-1940')
+    expect(artistLine('A', { ...life, ...period }, { style: 'line' })).toBe('A  \n1660, Chemnitz - 1736, Augsburg  \nAH 1316 - 1318 / AD 1898-1940')
+    expect(artistLine('A', period)).toBe('A')
+  })
+
   it('renders the line break as one through the sheet engine', () => {
     const [row] = sheetRows([{ key: 'artist', value: (c) => artistLine('A', c.text, { style: 'line' }) }], { text: life })
     expect(row.html).toBe('A<br>1660, Chemnitz - 1736, Augsburg')
