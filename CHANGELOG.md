@@ -1,3 +1,14 @@
+## 2.21.0 (2026-11-12)
+
+Helpers that let the sites drop code each of them copies, from the shared-code review (inventory-app `tmp/shared-code-review-2026-11`). Nothing a site does today changes.
+
+### Added
+
+- **`createStandardViewer(config, { dictionary, ownMessages })`**: the options as the second argument. The three-argument form, with a shell or `undefined` second, still works.
+- **`textsByLanguage(import.meta.glob('../locales/*.json', { eager: true }))`**: a site's own texts by language, the loop every `main.js` wrote by hand.
+- **`useCatalogueResults(spec, { entity })`**: the results engine of viewer-layout's `CatalogueResultsView` (filters and page from the URL, facets, dates, order, pages, rows, summary), callable by a page of another shape.
+- **`checkChromeSources(sources)`** (`@museumwnf/viewer-core/testing`): every chrome file a site's SOURCES.json lists is there byte for byte, and nothing else is; one line per problem.
+
 ## 2.20.0 (2026-11-09)
 
 An exhibition's partners and "Timeline for this item" as the updated Hijaz Railway demo shows them (museumwithnofrontiers/inventory-app#2491).

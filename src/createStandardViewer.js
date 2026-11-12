@@ -29,12 +29,15 @@ import { mergeMessages } from './i18n/index.js'
  * website still imports its own family's `catalogues` and passes it as
  * `dictionary`.
  *
+ * Every website calls it as `createStandardViewer(config, { dictionary,
+ * ownMessages })`. The older three-argument form, `(config, siteClass,
+ * options)`, still works: a second argument that carries none of the option
+ * keys below is taken for the shell component.
+ *
  * @param {object} config - the site's `dataset.config.js` object, exactly
  *   as passed to {@link createViewer} today
- * @param {object} [siteClass] - the site's `SiteShell` component, used as
- *   `config.shell` when `config` does not already set one (a config that
- *   still declares its own `shell` keeps taking precedence, so existing
- *   `dataset.config.js` files need no change)
+ * @param {object} [siteClass] - (older form) the site's shell component, used
+ *   as `config.shell` when `config` does not set one
  * @param {object} [options]
  * @param {object} [options.dictionary] - the family's shared catalogue,
  *   i.e. `catalogues` imported from
@@ -49,6 +52,10 @@ import { mergeMessages } from './i18n/index.js'
  *   `.unmount()` on it, e.g. in a test)
  */
 export function createStandardViewer(config, siteClass, options = {}) {
+  if (isOptions(siteClass) && arguments.length < 3) {
+    options = siteClass
+    siteClass = undefined
+  }
   const { dictionary, ownMessages, el = '#app' } = options
 
   const messages = dictionary
@@ -58,4 +65,25 @@ export function createStandardViewer(config, siteClass, options = {}) {
   const app = createViewer({ ...config, shell: config.shell ?? siteClass, messages })
   app.mount(el)
   return app
+}
+
+const OPTION_KEYS = ['dictionary', 'ownMessages', 'el']
+
+function isOptions(value) {
+  return Boolean(value) && typeof value === 'object' && OPTION_KEYS.some((key) => key in value)
+}
+
+/**
+ * A website's own texts, by language, from its `locales/<lang>.json` files as
+ * `import.meta.glob('../locales/*.json', { eager: true })` returns them — the
+ * glob itself stays in the site's `main.js`, where Vite resolves it:
+ *
+ *   ownMessages: textsByLanguage(import.meta.glob('../locales/*.json', { eager: true }))
+ */
+export function textsByLanguage(modules) {
+  const texts = {}
+  for (const [path, module] of Object.entries(modules ?? {})) {
+    texts[path.split('/').pop().replace(/\.json$/, '')] = module.default ?? module
+  }
+  return texts
 }

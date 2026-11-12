@@ -1,5 +1,5 @@
 export { createViewer } from './createViewer.js'
-export { createStandardViewer } from './createStandardViewer.js'
+export { createStandardViewer, textsByLanguage } from './createStandardViewer.js'
 export { useCatalogueData } from './composables/useCatalogueData.js'
 export {
   CATALOGUE_DATE_MODE, CATALOGUE_PAGE_SIZE, objectsAndMonumentsSummary, useCatalogue,
@@ -24,6 +24,7 @@ export { LEGACY_SITES, toNewSite, watchNewSiteLinks, withScheme } from './legacy
 
 // The list pages: query state, pagination, facets, dates, keyword search.
 export { useListQuery } from './catalogue/listQuery.js'
+export { useCatalogueResults } from './catalogue/catalogueResults.js'
 export { paginate, sortChronological, usePagination } from './catalogue/pagination.js'
 export { facetOptions, useFacets } from './catalogue/facets.js'
 export {
