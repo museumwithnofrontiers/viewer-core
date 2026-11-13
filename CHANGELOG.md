@@ -1,3 +1,13 @@
+## 2.22.0 (2026-11-13)
+
+Links to legacy books.museumwnf.org and to legacy's Exhibition Trails go to the new Publications and Travels sites (inventory-app#2544). Nothing else a site does changes.
+
+### Added
+
+- **`LEGACY_SITES`**: books.museumwnf.org (the `publications` site) and travels.museumwnf.org (the `travels` site).
+- **`toNewSite()`** sends legacy book-client's pages to the Publications site: `/book/<id>/<language>` to `/publication/<id>/<language>`, the book found by its legacy key `mwnf3:bookbase:<id>`; `/category/<name>/<page>` to `/category/<name>?page=<page>`; `/results` with its title, author, ISBN and language. And legacy's Exhibition Trails pages to the Travels site: `travel_et_home.php` to `/`, `travel_et_trail.php?cid=<country>` to `/trails?country=<country id>` (`?tid=<project>` to `?project=<project>`), `travel_et_trailDetail.php?id=<project>;<country>;<number>;<language>&fl=<tab>` to `/trail/<id>?tab=<tab>&lang=<language>`, `travel_et_itenary.php?id=…&fl=<tab>` to `/itinerary/<id>?tab=<tab>&lang=<language>`. A tab the new page has not (`reltou`), the sign-up page, and the rest of the travels host (the tours, the booking form) stay on legacy.
+- **`legacyRecordId(entity, key)`**: the inventory id the importer gives a legacy record, the UUIDv5 of `<entity>:<key, lowercased>` in its frozen namespace (inventory-app `scripts/importer/src/utils/deterministic-uuid.ts`), computed synchronously so a link is rewritten as it is drawn.
+
 ## 2.21.0 (2026-11-12)
 
 Helpers that let the sites drop code each of them copies, from the shared-code review (inventory-app `tmp/shared-code-review-2026-11`). Nothing a site does today changes.
