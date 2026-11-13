@@ -54,6 +54,23 @@ describe('toNewSite', () => {
     for (const href of [`${legacy}/`, `${legacy}/booking_form.php`, `${legacy}/travel_et_trail.php?cid=xx`]) expect(toNewSite(href)).toBe(href)
   })
 
+  // The ids are islamicart-data's own: `mwnf3:museums:Mus01:eg` and
+  // `mwnf3:institutions:Mon02:tr` (Travels' starting points and the books link to them).
+  it("sends Discover Islamic Art's virtual exhibitions and a partner to their new pages", () => {
+    expect(toNewSite('https://islamicart.museumwnf.org/exhibitions/ISL/')).toBe(`${NEW}/islamicart/#/exhibitions`)
+    expect(toNewSite('https://islamicart.museumwnf.org/exhibitions/isl')).toBe(`${NEW}/islamicart/#/exhibitions`)
+    expect(toNewSite('https://islamicart.museumwnf.org/pm_partner.php?id=Mus01;eg&type=museum&theme=ISL&')).toBe(
+      `${NEW}/islamicart/#/partner/f0c1b6b9-8198-5a97-9aea-8ebedfa90ca3`,
+    )
+    expect(toNewSite('https://islamicart.museumwnf.org/pm_partner.php?id=Mon02;tr&type=institution')).toBe(
+      `${NEW}/islamicart/#/partner/4f5bd5e0-0138-5ef6-8f9a-0bb1663130cb`,
+    )
+    // A partner page that names no partner, or a kind legacy never had, stays on legacy.
+    for (const href of ['https://islamicart.museumwnf.org/pm_partner.php', 'https://islamicart.museumwnf.org/pm_partner.php?id=Mus01;eg&type=shop']) {
+      expect(toNewSite(href)).toBe(href)
+    }
+  })
+
   it('keeps a product page that has no new counterpart on legacy', () => {
     expect(toNewSite('https://islamicart.museumwnf.org/mwnf_credit.php')).toBe('https://islamicart.museumwnf.org/mwnf_credit.php')
   })

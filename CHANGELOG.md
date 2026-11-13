@@ -1,3 +1,14 @@
+## 2.23.1 (2026-11-13)
+
+Two legacy addresses that stayed on legacy now go to the new Discover Islamic Art site. Pascal found the first on the Publications site.
+
+### Fixed
+
+- **`toNewSite()`** sends `islamicart.museumwnf.org/exhibitions/ISL/`, legacy's list of the virtual exhibitions, to `/exhibitions`. A book's text links to it.
+- **`toNewSite()`** sends `pm_partner.php?id=<partner>;<country>&type=museum|institution` to `/partner/<id>`. The id is the importer's (`mwnf3:museums:…` or `mwnf3:institutions:…`). The Travels trails' starting points link to these pages.
+
+With this release, the only addresses in publications-data and travels-data that still stay on legacy are the legal notice and a PDF on images.museumwnf.org. Both belong to the portal, which has no new site yet.
+
 ## 2.23.0 (2026-11-13)
 
 The link to the global search (inventory-app M15, ADR 005), off by default: no site changes until it sets `globalSearch`.
