@@ -1,3 +1,14 @@
+## 2.23.0 (2026-11-13)
+
+The link to the global search (inventory-app M15, ADR 005), off by default: no site changes until it sets `globalSearch`.
+
+### Added
+
+- **`globalSearch`** in `dataset.config.js`: `true` for the search site at `GLOBAL_SEARCH_URL` (`https://museumwithnofrontiers.github.io/search/`), or `{ url }` for another https address.
+- **`globalSearchUrl({ q, lang })`**: `<search>/#/?q=…&lang=…&from=<this site>`, the text escaped, the language kept only when it is a code, and nothing taken from content. Null unless the site opted in.
+- **`useGlobalSearch()`**: `{ enabled, url(q, lang) }`, for viewer-layout's search box.
+- **`siteSlug()`** and the optional `site.slug`: the site's slug, else the last segment of `site.origin`.
+
 ## 2.22.0 (2026-11-13)
 
 Links to legacy books.museumwnf.org and to legacy's Exhibition Trails go to the new Publications and Travels sites (inventory-app#2544). Nothing else a site does changes.
