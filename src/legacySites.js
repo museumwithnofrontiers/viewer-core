@@ -122,6 +122,8 @@ const PAGES = {
     '/hcr_home.php': '/timeline', '/dynasties/': '/dynasties',
     '/isl_missionstatement.php': '/mission-statement', '/recommendedlinks.php': '/recommended-links',
     '/atrium_sponsor_detail.php': '/sponsors', '/glossarysearch.php': '/glossary-spelling',
+    // The list of the virtual exhibitions; each one is a mini-site row above.
+    '/exhibitions/isl': '/exhibitions', '/exhibitions/isl/': '/exhibitions', '/exhibitions/isl/index.php': '/exhibitions',
   },
   baroqueart: {
     '/': '/', '/index.php': '/',
@@ -206,6 +208,18 @@ function travelsRoute(path, url) {
   return null
 }
 
+// Discover Islamic Art's partner page (`pm_partner.php?id=<partner>;<country>&type=museum|institution`),
+// keyed as the importer keys a partner (`mwnf3:museums:…`, `mwnf3:institutions:…`). Travels' trails and the
+// books link to it for their museums. Its other pages are PAGES above.
+const PARTNER_KINDS = { museum: 'museums', institution: 'institutions' }
+function islamicartRecordRoute(path, url) {
+  if (path.toLowerCase() !== '/pm_partner.php') return undefined
+  const [partner, country] = (url.searchParams.get('id') ?? '').split(';').map((part) => part.trim())
+  const kind = PARTNER_KINDS[(url.searchParams.get('type') ?? 'museum').toLowerCase()]
+  if (!partner || !country || !kind) return null
+  return `/partner/${legacyRecordId('partner', `mwnf3:${kind}:${partner}:${country}`)}`
+}
+
 // The families whose pages name a record or a page in their address.
 const RECORD_PAGES = { publications: publicationsRoute, travels: travelsRoute }
 
@@ -240,6 +254,10 @@ function routeFor(row, url) {
     const rest = path.split('/').filter(Boolean).slice(1)
     const lang = /^[a-z]{2}$/.test(rest[0] ?? '') ? rest.shift() : null
     return `/${rest.join('/')}${lang ? `?lang=${lang}` : ''}`
+  }
+  if (row.family === 'islamicart') {
+    const record = islamicartRecordRoute(path, url)
+    if (record !== undefined) return record
   }
   const route = PAGES[row.family]?.[pathname.toLowerCase()]
   if (!route) return null
