@@ -157,6 +157,8 @@ What a website's `main.js` still writes, and why it cannot move here:
 | `media` | `{ legacyHost }` | no | the host of the legacy media server, for [`mediaUrl()`](#the-declaration-outside-a-component) |
 | `links` | object | no | the addresses a website links out to: `portal`, `galleries`, `myCollection`, `about`, `contact`, `legalNotice`, `credits`, `cookies` |
 | `site.origin` | string | no | the absolute origin this build is deployed at, base path included when there is one (`https://metanull.github.io/islamicart`, no trailing slash) — declared once here rather than baked into the package, since the package cannot know where it will be served; read by [`sourceUrl()`](#the-declaration-outside-a-component) |
+| `site.slug` | string | no | the site's slug, as in the exporters' instance files; defaults to the last segment of `site.origin`. The global search's link sends it as `from` |
+| `globalSearch` | `true` or `{ url }` | no | **off by default.** Turns on the link to the global search (inventory-app M15, ADR 005): `true` for its default address (`GLOBAL_SEARCH_URL`), `{ url }` for another https address. viewer-layout's header then shows its search box. The parity check turns it on for the sites whose legacy had a similar feature |
 
 `dataset.config.js` is the whole declaration of a website. Before it mounts,
 a website reads nothing from its data package but `manifest.json`; it reads
@@ -579,6 +581,9 @@ below for whichever future site needs its own).
 | `mediaUrl(path, size = 'hi_res')` | `${config.media.legacyHost}/${size}/${path}` for a legacy media path the package carries; an address is returned as it is |
 | `useSiteRights()` | `{ holder, termsUrl, attribution }` from the data package's `manifest.rights`; a package with no such block offers no holder or attribution, and `termsUrl` falls back to `mwnfLinks.legalNotice` |
 | `sourceUrl(route)` | `${config.site.origin}/#${path}` for `route` — a route already resolved (its `fullPath` read as it is) or a raw location the installed router resolves; null when the website declares no `site.origin` |
+| `globalSearchUrl({ q, lang })` | the global search's address for `q` in `lang`, with this site's slug as `from`; null unless the site sets `globalSearch`. It never takes an address from content: the search site accepts only slugs from its own list of sites |
+| `useGlobalSearch()` | `{ enabled, url(q, lang) }` for a component, such as viewer-layout's search box |
+| `siteSlug()` | this site's slug: `site.slug`, else the last segment of `site.origin`; null when neither is a valid slug |
 
 ### `useDataPackage()` → data access (the only allowed way to read the data package)
 

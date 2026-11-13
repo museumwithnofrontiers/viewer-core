@@ -21,6 +21,7 @@ export { mediaUrl, useSiteConfig } from './siteConfig.js'
 export { bindDisplayLanguage, displayLanguage } from './displayLanguage.js'
 export { siblingSiteUrl, sourceUrl, useSiteRights } from './rights.js'
 export { LEGACY_SITES, toNewSite, watchNewSiteLinks, withScheme } from './legacySites.js'
+export { GLOBAL_SEARCH_URL, globalSearchUrl, siteSlug, useGlobalSearch } from './globalSearch.js'
 export { legacyRecordId } from './legacyIds.js'
 
 // The list pages: query state, pagination, facets, dates, keyword search.
