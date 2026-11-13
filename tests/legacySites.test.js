@@ -26,6 +26,34 @@ describe('toNewSite', () => {
     expect(toNewSite('https://sharinghistory.museumwnf.org/about_team.php')).toBe(`${NEW}/sharinghistory/#/about/team`)
   })
 
+  // The ids are the published packages' own: publications-data's book
+  // `mwnf3:bookbase:5`, travels-data's trail `mwnf3_travels:trail:IAM:dz:1`
+  // and itinerary `mwnf3_travels:itinerary:IAM:tn:1:I`.
+  it('sends a legacy book, a category and a search to the Publications site', () => {
+    const book = '4a74f98f-eeaf-53ea-9c47-c31ebc1c8cfb'
+    expect(toNewSite('https://books.museumwnf.org/')).toBe(`${NEW}/publications/#/`)
+    expect(toNewSite('https://books.museumwnf.org/book/5/en')).toBe(`${NEW}/publications/#/publication/${book}/en`)
+    expect(toNewSite('https://books.museumwnf.org/book/5')).toBe(`${NEW}/publications/#/publication/${book}`)
+    expect(toNewSite('https://books.museumwnf.org/category/travel-books/2')).toBe(`${NEW}/publications/#/category/travel-books?page=2`)
+    expect(toNewSite('https://books.museumwnf.org/category/new/1')).toBe(`${NEW}/publications/#/category/new`)
+    expect(toNewSite('https://books.museumwnf.org/results?title=light&c=x')).toBe(`${NEW}/publications/#/results?title=light`)
+    expect(toNewSite('https://books.museumwnf.org/sign-up')).toBe('https://books.museumwnf.org/sign-up')
+  })
+
+  it("sends legacy's Exhibition Trails to the Travels site, its tab and language in the query", () => {
+    const trail = '06c4a15f-0473-5ab8-a5ce-e85562d75351'
+    const itinerary = 'cbcc1e88-5eda-5ac4-8cf9-6b8fb6a20bad'
+    const legacy = 'https://travels.museumwnf.org'
+    expect(toNewSite(`${legacy}/travel_et_home.php`)).toBe(`${NEW}/travels/#/`)
+    expect(toNewSite(`${legacy}/travel_et_trail.php?cid=tn`)).toBe(`${NEW}/travels/#/trails?country=tun`)
+    expect(toNewSite(`${legacy}/travel_et_trail.php?tid=IAM`)).toBe(`${NEW}/travels/#/trails?project=IAM`)
+    expect(toNewSite(`${legacy}/travel_et_trailDetail.php?id=IAM;dz;1;en&fl=its`)).toBe(`${NEW}/travels/#/trail/${trail}?tab=its&lang=en`)
+    expect(toNewSite(`${legacy}/travel_et_trailDetail.php?id=IAM;dz;1;fr&fl=reltou`)).toBe(`${NEW}/travels/#/trail/${trail}?lang=fr`)
+    expect(toNewSite(`${legacy}/travel_et_itenary.php?id=IAM;tn;I;en;1&fl=des&itrNo=11`)).toBe(`${NEW}/travels/#/itinerary/${itinerary}?tab=des&lang=en`)
+    // Legacy's tours and booking form have no new site.
+    for (const href of [`${legacy}/`, `${legacy}/booking_form.php`, `${legacy}/travel_et_trail.php?cid=xx`]) expect(toNewSite(href)).toBe(href)
+  })
+
   it('keeps a product page that has no new counterpart on legacy', () => {
     expect(toNewSite('https://islamicart.museumwnf.org/mwnf_credit.php')).toBe('https://islamicart.museumwnf.org/mwnf_credit.php')
   })

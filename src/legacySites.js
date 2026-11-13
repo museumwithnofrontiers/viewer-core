@@ -1,3 +1,4 @@
+import { legacyRecordId } from './legacyIds.js'
 import { siblingSiteUrl } from './rights.js'
 
 // Links to legacy MWNF sites that have a new one (inventory-app#2482). The
@@ -9,7 +10,8 @@ import { siblingSiteUrl } from './rights.js'
 //
 // The estate's legacy addresses, one row a site: a gallery, Explore, the
 // galleries hub and the three products by host; an exhibition by host and
-// its first path segment (they share a host); a mini-site by its own page
+// its first path segment (they share a host); Publications (legacy books)
+// and Travels (legacy's Exhibition Trails) by host; a mini-site by its own page
 // (a Sharing History one by its `eId`). Built from the parity tool's sitemap
 // (the legacy dumps) and the exporters' instance files; the parity `links`
 // pass fails on a link this table misses.
@@ -18,6 +20,7 @@ export const LEGACY_SITES = [
   { host: 'archaeology.museumwnf.org', slug: 'archaeology', family: 'gallery' },
   { host: 'architectural-elements.museumwnf.org', slug: 'architectural-elements', family: 'gallery' },
   { host: 'arms-armoury.museumwnf.org', slug: 'arms-armoury', family: 'gallery' },
+  { host: 'books.museumwnf.org', slug: 'publications', family: 'publications' },
   { host: 'exhibitions.museumwnf.org', path: '/arts_in_dialogue/', slug: 'arts-in-dialogue', family: 'exhibition' },
   { host: 'baroqueart.museumwnf.org', slug: 'baroqueart', family: 'baroqueart' },
   { host: 'baroqueart.museumwnf.org', path: '/exhibitions/bar/absolutism/', slug: 'baroqueart-absolutism', family: 'minisite' },
@@ -94,6 +97,7 @@ export const LEGACY_SITES = [
   { host: 'exhibitions.museumwnf.org', path: '/the_use_of_colours_in_art/', slug: 'the-use-of-colours-in-art', family: 'exhibition' },
   { host: 'theatre.museumwnf.org', slug: 'theatre', family: 'gallery' },
   { host: 'toys-games.museumwnf.org', slug: 'toys-games', family: 'gallery' },
+  { host: 'travels.museumwnf.org', slug: 'travels', family: 'travels' },
   { host: 'wallpaintings.museumwnf.org', slug: 'wallpaintings', family: 'gallery' },
   { host: 'exhibitions.museumwnf.org', path: '/water_in_islam/', slug: 'water-in-islam', family: 'exhibition' },
   { host: 'weights-measures.museumwnf.org', slug: 'weights-measures', family: 'gallery' },
@@ -138,6 +142,73 @@ const PAGES = {
 // The query keys a page's new route reads as legacy's did.
 const KEPT_QUERY = { '/partners/results': ['type'] }
 
+// Legacy books.museumwnf.org (book-client's routes): a book by its legacy id
+// (`mwnf3:bookbase:<id>`) in the version's language, a category's page, the
+// search (its free-text fields and the language, whose values the new search
+// reads as legacy's did). Its sign-up page has no counterpart.
+const BOOK_SEARCH_KEYS = ['title', 'author', 'isbn', 'language']
+function publicationsRoute(path, url) {
+  if (path === '/') return '/'
+  let match = /^\/book\/(\d+)(?:\/([a-z]{2}))?$/i.exec(path)
+  if (match) {
+    const id = legacyRecordId('publication', `mwnf3:bookbase:${match[1]}`)
+    return `/publication/${id}${match[2] ? `/${match[2].toLowerCase()}` : ''}`
+  }
+  match = /^\/category\/([a-z0-9-]+)(?:\/(\d+))?$/i.exec(path)
+  if (match) {
+    const page = match[2] && match[2] !== '1' ? `?page=${match[2]}` : ''
+    return `/category/${match[1].toLowerCase()}${page}`
+  }
+  if (path === '/results') {
+    const kept = BOOK_SEARCH_KEYS.filter((key) => url.searchParams.get(key))
+    return kept.length ? `/results?${kept.map((key) => `${key}=${encodeURIComponent(url.searchParams.get(key))}`).join('&')}` : '/results'
+  }
+  return null
+}
+
+// Legacy travels.museumwnf.org's Exhibition Trails: a country's or a theme's
+// trails, a trail (`?id=<project>;<country>;<number>;<language>`) and an
+// itinerary (`?id=<project>;<country>;<roman number>;<language>;<trail>`),
+// keyed as the importer keys them (`mwnf3_travels:trail:…`,
+// `mwnf3_travels:itinerary:…`), each tab (`fl`) the new page has. The rest of
+// the host (the tours, the booking form) has no new site and stays there.
+// The trails' countries: legacy's code → the inventory id travels-data's
+// countries.json gives it.
+const TRAVELS_COUNTRIES = {
+  dz: 'dza', eg: 'egy', es: 'esp', it: 'ita', jo: 'jor', ma: 'mar', pa: 'pse', pt: 'prt', sy: 'syr', tn: 'tun', tr: 'tur',
+}
+const TRAIL_TABS = ['desc', 'its', 'cur']
+const ITINERARY_TABS = ['des', 'vl']
+function travelsQuery(url, tabs, language) {
+  const tab = (url.searchParams.get('fl') ?? '').toLowerCase()
+  const query = [tabs.includes(tab) ? `tab=${tab}` : null, /^[a-z]{2}$/i.test(language ?? '') ? `lang=${language.toLowerCase()}` : null]
+  const kept = query.filter(Boolean)
+  return kept.length ? `?${kept.join('&')}` : ''
+}
+function travelsRoute(path, url) {
+  const script = path.toLowerCase()
+  if (script === '/travel_et_home.php') return '/'
+  if (script === '/travel_et_trail.php') {
+    const country = TRAVELS_COUNTRIES[(url.searchParams.get('cid') ?? '').toLowerCase()]
+    if (country) return `/trails?country=${country}`
+    const project = url.searchParams.get('tid')
+    return /^[a-z0-9]+$/i.test(project ?? '') ? `/trails?project=${project.toUpperCase()}` : null
+  }
+  const id = (url.searchParams.get('id') ?? '').split(';').map((part) => part.trim())
+  if (script === '/travel_et_traildetail.php' && id.length >= 3 && id.slice(0, 3).every(Boolean)) {
+    const [project, country, number, language] = id
+    return `/trail/${legacyRecordId('collection', `mwnf3_travels:trail:${project}:${country}:${number}`)}${travelsQuery(url, TRAIL_TABS, language)}`
+  }
+  if (script === '/travel_et_itenary.php' && id.length >= 5 && [0, 1, 2, 4].every((i) => id[i])) {
+    const [project, country, number, language, trail] = id
+    return `/itinerary/${legacyRecordId('collection', `mwnf3_travels:itinerary:${project}:${country}:${trail}:${number}`)}${travelsQuery(url, ITINERARY_TABS, language)}`
+  }
+  return null
+}
+
+// The families whose pages name a record or a page in their address.
+const RECORD_PAGES = { publications: publicationsRoute, travels: travelsRoute }
+
 const bareHost = (host) => host.toLowerCase().replace(/^www\./, '')
 
 function rowFor(url) {
@@ -164,6 +235,7 @@ function routeFor(row, url) {
   const path = pathname.replace(/\/+$/, '') || '/'
   if (row.family === 'gallery' || row.family === 'explore' || row.family === 'galleries') return `${path}${url.search}`
   if (row.family === 'minisite') return '/'
+  if (RECORD_PAGES[row.family]) return RECORD_PAGES[row.family](path, url)
   if (row.family === 'exhibition') {
     const rest = path.split('/').filter(Boolean).slice(1)
     const lang = /^[a-z]{2}$/.test(rest[0] ?? '') ? rest.shift() : null
